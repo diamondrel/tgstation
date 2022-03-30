@@ -784,6 +784,7 @@
 	name = "Sodium Thiopental"
 	description = "Sodium Thiopental induces heavy weakness in its target as well as unconsciousness."
 	silent_toxin = TRUE
+	truth_serum = TRUE
 	reagent_state = LIQUID
 	color = "#6496FA"
 	metabolization_rate = 0.75 * REAGENTS_METABOLISM
