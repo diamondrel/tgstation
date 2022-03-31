@@ -21,3 +21,4 @@
 	if(target.isbroken)
 		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, they kick and scream."), span_warning("[target] screams, you've broken them already."),\
 		span_hear("You hear a lamp clicking on and screaming, followed by a sigh."))
+	run_interrogation_selection()
