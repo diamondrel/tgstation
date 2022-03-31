@@ -159,7 +159,9 @@
 						to_chat(user, span_notice("[M] doesn't have any organs in [their] mouth."))
 					if(pill_count)
 						to_chat(user, span_notice("[M] has [pill_count] pill[pill_count > 1 ? "s" : ""] implanted in [their] teeth."))
-
+	else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
+		user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
+			span_notice("You push the [src] reaaalll close to [M]'s head."))
 	else
 		return ..()
 

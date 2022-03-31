@@ -782,9 +782,8 @@
 
 /datum/reagent/toxin/sodium_thiopental
 	name = "Sodium Thiopental"
-	description = "Sodium Thiopental induces heavy weakness in its target as well as unconsciousness."
+	description = "Sodium Thiopental induces heavy weakness and drowsiness in its target, frequently used for information extraction."
 	silent_toxin = TRUE
-	truth_serum = TRUE
 	reagent_state = LIQUID
 	color = "#6496FA"
 	metabolization_rate = 0.75 * REAGENTS_METABOLISM
@@ -793,15 +792,15 @@
 
 /datum/reagent/toxin/sodium_thiopental/on_mob_add(mob/living/L, amount)
 	. = ..()
+	ADD_TRAIT(L, TRAIT_NOHARDCRIT, name)
 	ADD_TRAIT(L, TRAIT_ANTICONVULSANT, name)
 
 /datum/reagent/toxin/sodium_thiopental/on_mob_delete(mob/living/L)
 	. = ..()
+	REMOVE_TRAIT(L, TRAIT_NOHARDCRIT, name)
 	REMOVE_TRAIT(L, TRAIT_ANTICONVULSANT, name)
 
 /datum/reagent/toxin/sodium_thiopental/on_mob_life(mob/living/carbon/M, delta_time, times_fired)
-	if(current_cycle >= 10)
-		M.Sleeping(40 * REM * delta_time)
 	M.adjustStaminaLoss(10 * REM * delta_time, 0)
 	..()
 	return TRUE

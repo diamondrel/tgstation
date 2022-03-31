@@ -164,7 +164,7 @@
 
 /obj/item/reagent_containers/glass/bottle/sodium_thiopental
 	name = "sodium thiopental bottle"
-	desc = "A small bottle. Contains sodium thiopental."
+	desc = "A small bottle. Contains sodium thiopental, used for torture, how fun!"
 	list_reagents = list(/datum/reagent/toxin/sodium_thiopental = 30)
 
 /obj/item/reagent_containers/glass/bottle/coniine
