@@ -30,23 +30,23 @@
 		if(target.isantag)
 			if(target.
 
-/datum/interrogation/proc/istraitor(mob/user,mob/living/target)
+/datum/interrogation/proc/verify(mob/user,mob/living/target,var/antagtype)
+	if(user.isantag==TRUE&&user.antag==antagtype)
 	
-
 /datum/interrogation/proc/interrogation_selection(mob/user, mob/living/target, try_to_fail = FALSE)
 	var/findtraitor = TRUE
 	if(can_start) //pseudocode, TODO
 		if(target.interrostage==1)
-			menu.b1(verify(user,target,"cultist"), "Cultist) //maybe only works on those a part of a traitor group, ones that can be pretty easily identified? so not basic syndie traitors?
-			menu.b2(verify(user,target,"nukie"), "Nuclear Operative")
-			menu.b3(verify(user,target,"rev"), "Revolutionary")
-			menu.b4(verify(user,target,"changeling"), "Changeling")
-			menu.b6(verify(user,target,"heretic"), "Heretic")
-			menu.b7(verify(user,target,"wizard"), "Wizard")
-			menu.b8(verify(user,target,"fugitive"), "Fugitive")
-			menu.b9(verify(user,target,"hunter"), "Hunter")
-			menu.b10(verify(user,target,"obsessed"), "Obsessed")
-			menu.b11(verify(user,target,"thief"), "Thief")
+			menu.b1(verify(user,target,"cultist"), "Cultist",TRUE)
+			menu.b2(verify(user,target,"nukie"), "Nuclear Operative",TRUE)
+			menu.b3(verify(user,target,"rev"), "Revolutionary",TRUE)
+			menu.b4(verify(user,target,"changeling"), "Changeling",TRUE)
+			menu.b6(verify(user,target,"heretic"), "Heretic",TRUE)
+			menu.b7(verify(user,target,"wizard"), "Wizard",TRUE)
+			menu.b8(verify(user,target,"fugitive"), "Fugitive",TRUE)
+			menu.b9(verify(user,target,"hunter"), "Hunter",TRUE)
+			menu.b10(verify(user,target,"obsessed"), "Obsessed",TRUE)
+			menu.b11(verify(user,target,"thief"), "Thief",TRUE)
 		if(target.interrostage==2)
 			if(target.antagtype==cultist)
 				menu.b1(interro_selector(collabors,easy),"Attempt to extract the names of other cultists")
