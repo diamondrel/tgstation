@@ -18,18 +18,14 @@
 		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s head, they don't respond."), span_warning("Dead men tell no tales."),\
 		span_hear("You hear a lamp clicking on followed by a sigh."))
 		return FALSE
-	if(HAS_TRAIT(target,TRAIT_TOLD_TRUTH)) //pseudocode, TODO
+	if(HAS_TRAIT(target,TRAIT_TOLD_TRUTH))
 		user.span_warning("Either [target] is telling the truth, or they're one hell of a poker player.")
 		return FALSE
-	if(HAS_TARGET(target,TRAIT_BROKEN)) // pseudocode, TODO
+	if(HAS_TARGET(target,TRAIT_BROKEN))
 		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, they kick and scream."), span_warning("[target] screams, you've broken them already."),\
 		span_hear("You hear screaming, a lamp clicking on, then followed by a sigh."))
 		return FALSE
 	return TRUE
-
-/datum/interrogation/proc/isbroken(mob/living/target)
-
-/datum/interrogation/proc/
 
 /datum/interrogation/proc/isantag(mob/living/target,var/antagtype)
 	return target.mind.has_antag_datum(antagtype)
@@ -38,13 +34,13 @@
 	var/findtraitor = TRUE
 	if(can_start) //pseudocode, TODO
 		if(target.interrostage==1)
-			menu.b1(verifyinterro(target,/datum/antagonist/cult)), "Cultist",TRUE)
-			menu.b2(verifyinterro(target,/datum/antagonist/nukeops)), "Nuclear Operative",TRUE)
-			menu.b3(verifyinterro(target,"rev"), "Revolutionary",TRUE)
-			menu.b4(verifyinterro(target,"changeling"), "Changeling",TRUE)
-			menu.b6(verifyinterro(target,"heretic"), "Heretic",TRUE)
-			menu.b7(verifyinterro(target,"wizard"), "Wizard",TRUE)
-			menu.b8(verifyinterro(target,"fugitive"), "Fugitive",TRUE)
+			menu.b1(target.mind.has_antag_datum(/datum/antagonist/cult)), "Cultist",TRUE)
+			menu.b2(isantag(target,/datum/antagonist/nukeops)), "Nuclear Operative",TRUE)
+			menu.b3(isantag(target,"rev"), "Revolutionary",TRUE)
+			menu.b4(isantag(target,"changeling"), "Changeling",TRUE)
+			menu.b6(isantag(target,"heretic"), "Heretic",TRUE)
+			menu.b7(isantag(target,"wizard"), "Wizard",TRUE)
+			menu.b8(isantag(target,"fugitive"), "Fugitive",TRUE)
 			menu.b9(verifyinterro(target,"hunter"), "Hunter",TRUE)
 			menu.b10(verifyinterro(target,"obsessed"), "Obsessed",TRUE)
 			menu.b11(verifyinterro(target,"thief"), "Thief",TRUE)
