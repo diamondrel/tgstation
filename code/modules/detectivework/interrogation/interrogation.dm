@@ -60,8 +60,8 @@
 			if(user.mind.has_antag_datum(datum/antagonist/rev))
 				menu.b1(interro_selector(target,"collabors","medium"),"Attempt to extract the names of other revolutionaries") //crit success gives revhead? or there could be another option for heads
 			if(user.mind.has_antag_datum(datum/antagonist/traitor)&&findtraitor)
-				menu.b1(interro_selector(target,"purchase","easy"),"Attempt to learn of a code phrase used by traitors to communicate)
-				menu.b1(interro_selector(target,"phrases","medium"),"Attempt to learn of a code phrase used by syndicate operatives to communicate)
+				menu.b1(interro_selector(target,"purchase","easy"),"Attempt to learn of a code phrase used by traitors to communicate")
+				menu.b1(interro_selector(target,"phrases","medium"),"Attempt to learn of a code phrase used by syndicate operatives to communicate")
 				menu.b2(interro_selector(target,"uplink","hard"),"Attempt to extract the uplink code used by this operative")
 		ui_interact(user)
 	return
