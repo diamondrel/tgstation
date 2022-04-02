@@ -358,6 +358,9 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 /// For living mobs. It signals that the mob shouldn't have their data written in an external json for persistence.
 #define TRAIT_DONT_WRITE_MEMORY "dont_write_memory"
 
+/// Used to determine whether or not the user has been cracked during interrogation
+#define TRAIT_BROKEN "broken"
+
 #define TRAIT_NOBLEED "nobleed" //This carbon doesn't bleed
 /// This atom can ignore the "is on a turf" check for simple AI datum attacks, allowing them to attack from bags or lockers as long as any other conditions are met
 #define TRAIT_AI_BAGATTACK "bagattack"

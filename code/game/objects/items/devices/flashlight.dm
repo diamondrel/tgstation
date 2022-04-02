@@ -162,6 +162,7 @@
 	else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
 		user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
 			span_notice("You push the [src] reaaalll close to [M]'s head."))
+		interrogation_selector(user,M,src)
 	else
 		return ..()
 
