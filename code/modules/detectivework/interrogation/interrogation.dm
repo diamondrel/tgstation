@@ -63,7 +63,7 @@
 				menu.b1(interro_selector(target,"purchase","easy"),"Attempt to learn of a code phrase used by traitors to communicate")
 				menu.b1(interro_selector(target,"phrases","medium"),"Attempt to learn of a code phrase used by syndicate operatives to communicate")
 				menu.b2(interro_selector(target,"uplink","hard"),"Attempt to extract the uplink code used by this operative")
-		ui_interact(user)
+		ui_interact(user,src)
 	return
 
 /datum/interrogation/ui_interact(mob/user,datum/tgui/ui)
