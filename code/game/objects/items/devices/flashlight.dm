@@ -162,9 +162,34 @@
 	else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
 		user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
 			span_notice("You push the [src] reaaalll close to [M]'s head."))
-		interrogation_selector(user,M,src)
 	else
 		return ..()
+
+/obj/item/flashlight/ui_interact(mob/user, datum/tgui/ui)
+  ui = SStgui.try_update_ui(user, src, ui)
+  if(!ui)
+    ui = new(user, src, "InterroSelector")
+    ui.open()
+
+/obj/item/flashlight/ui_data(mob/user)
+  var/list/data = list()
+  data["name"] = name
+  data["target"] = target
+  data["type"] = type
+  data["difficulty"] = difficulty
+
+  return data
+
+/obj/item/flashlight/ui_act(action, params)
+  . = ..()
+  if(.)
+    return
+  if(action == "verify")
+    var/new_color = params["color"]
+    if(!(color in allowed_coors))
+      return FALSE
+    color = new_color
+    . = TRUE
 
 /obj/item/flashlight/pen
 	name = "penlight"
