@@ -12,7 +12,7 @@
 
 /datum/interrogation/proc/can_start(mob/user, mob/living/target, obj/item/tool)
 	if(target.stat == UNCONSCIOUS)
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who softly grunts in response."), span_warning("[target] doesn't respond, they appear to be unconscious."),\
+		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who softly grunts in response."), span_warning("[target] merely grunts in response, they appear to be unconscious."),\
 		span_hear("You hear muffled grunts and a [tool] clicking on, followed by a sigh."))
 		return FALSE
 	if(target.stat == DEAD)
