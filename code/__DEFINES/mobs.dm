@@ -24,6 +24,9 @@
 /// How efficiently humans regenerate blood.
 #define BLOOD_REGEN_FACTOR 0.25
 
+/// Temperature at which blood loss and regen stops. [/mob/living/carbon/human/proc/handle_blood]
+#define BLOOD_STOP_TEMP 225
+
 //Sizes of mobs, used by mob/living/var/mob_size
 #define MOB_SIZE_TINY 0
 #define MOB_SIZE_SMALL 1
@@ -49,12 +52,10 @@
 #define MOB_SPIRIT (1 << 9)
 #define MOB_PLANT (1 << 10)
 
+
 //Organ defines for carbon mobs
 #define ORGAN_ORGANIC 1
 #define ORGAN_ROBOTIC 2
-
-#define BODYPART_ORGANIC 1
-#define BODYPART_ROBOTIC 2
 
 #define DEFAULT_BODYPART_ICON_ORGANIC 'icons/mob/human_parts_greyscale.dmi'
 #define DEFAULT_BODYPART_ICON_ROBOTIC 'icons/mob/augmentation/augments.dmi'
@@ -63,7 +64,62 @@
 #define ALIEN_BODYPART "alien"
 #define LARVA_BODYPART "larva"
 
+//Bodypart change blocking flags
+///Bodypart does not get replaced during set_species()
+#define BP_BLOCK_CHANGE_SPECIES (1<<0)
 
+//Bodytype defines for how things can be worn, surgery, and other misc things.
+///The limb is organic
+#define BODYTYPE_ORGANIC (1<<0)
+///The limb is robotic
+#define BODYTYPE_ROBOTIC (1<<1)
+///The limb fits the human mold
+#define BODYTYPE_HUMANOID (1<<2)
+///The limb is digitigrade
+#define BODYTYPE_DIGITIGRADE (1<<3) //Cancer
+///The limb fits the monkey mold
+#define BODYTYPE_MONKEY (1<<4)
+///The limb is snouted
+#define BODYTYPE_SNOUTED (1<<5)
+
+//Defines for Species IDs
+#define SPECIES_ABDUCTOR "abductor"
+#define SPECIES_ANDROID "android"
+#define SPECIES_DULLAHAN "dullahan"
+#define SPECIES_ETHEREAL "ethereal"
+#define SPECIES_FELINE "felinid"
+#define SPECIES_FLYPERSON "fly"
+#define SPECIES_HUMAN "human"
+#define SPECIES_JELLYPERSON "jelly"
+#define SPECIES_SLIMEPERSON "slime"
+#define SPECIES_LUMINESCENT "luminescent"
+#define SPECIES_STARGAZER "stargazer"
+#define SPECIES_LIZARD "lizard"
+#define SPECIES_LIZARD_ASH "ashwalker"
+#define SPECIES_LIZARD_SILVER "silverscale"
+#define SPECIES_NIGHTMARE "nightmare"
+#define SPECIES_MONKEY "monkey"
+#define SPECIES_MOTH "moth"
+#define SPECIES_MUSHROOM "mush"
+#define SPECIES_PLASMAMAN "plasmaman"
+#define SPECIES_PODPERSON "pod"
+#define SPECIES_SHADOW "shadow"
+#define SPECIES_SKELETON "skeleton"
+#define SPECIES_SNAIL "snail"
+#define SPECIES_VAMPIRE "vampire"
+#define SPECIES_ZOMBIE "zombie"
+#define SPECIES_ZOMBIE_INFECTIOUS "memezombie"
+#define SPECIES_ZOMBIE_KROKODIL "krokodil_zombie"
+
+//See: datum/species/var/digitigrade_customization
+///The species does not have digitigrade legs in generation.
+#define DIGITIGRADE_NEVER 0
+///The species can have digitigrade legs in generation
+#define DIGITIGRADE_OPTIONAL 1
+///The species is forced to have digitigrade legs in generation.
+#define DIGITIGRADE_FORCED 2
+
+//TODO: Remove entirely in favor of the BODYTYPE system
 ///Body type bitfields for allowed_animal_origin used to check compatible surgery body types (use NONE for no matching body type)
 #define HUMAN_BODY (1 << 0)
 #define MONKEY_BODY (1 << 1)
@@ -369,7 +425,8 @@
 #define MAX_REVIVE_FIRE_DAMAGE 180
 #define MAX_REVIVE_BRUTE_DAMAGE 180
 
-#define HUMAN_FIRE_STACK_ICON_NUM 3
+// If a mob has a higher threshold than this, the icon shown will be increased to the big fire icon.
+#define MOB_BIG_FIRE_STACK_THRESHOLD 3
 
 #define GRAB_PIXEL_SHIFT_PASSIVE 6
 #define GRAB_PIXEL_SHIFT_AGGRESSIVE 12
@@ -540,7 +597,7 @@
 #define SHOES_LAYER 20
 /// Ears layer (Spessmen have ears? Wow)
 #define EARS_LAYER 19
-/// Suit layer (armor, hardsuits, etc.)
+/// Suit layer (armor, coats, etc.)
 #define SUIT_LAYER 18
 /// Glasses layer
 #define GLASSES_LAYER 17

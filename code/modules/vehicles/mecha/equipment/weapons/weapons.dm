@@ -3,6 +3,7 @@
 	range = MECHA_RANGED
 	equipment_slot = MECHA_WEAPON
 	destroy_sound = 'sound/mecha/weapdestr.ogg'
+	mech_flags = EXOSUIT_MODULE_COMBAT
 	var/projectile
 	var/fire_sound
 	var/projectiles_per_shot = 1
@@ -11,7 +12,6 @@
 	var/projectile_delay = 0
 	var/firing_effect_type = /obj/effect/temp_visual/dir_setting/firing_effect //the visual effect appearing when the weapon is fired.
 	var/kickback = TRUE //Will using this weapon in no grav push mecha back.
-	mech_flags = EXOSUIT_MODULE_COMBAT
 
 /obj/item/mecha_parts/mecha_equipment/weapon/can_attach(obj/vehicle/sealed/mecha/M, attach_right = FALSE)
 	if(!..())
@@ -194,7 +194,7 @@
 			continue
 		to_chat(M, "<font color='red' size='7'>HONK</font>")
 		M.SetSleeping(0)
-		M.stuttering += 20
+		M.adjust_timed_status_effect(40 SECONDS, /datum/status_effect/speech/stutter)
 		var/obj/item/organ/ears/ears = M.getorganslot(ORGAN_SLOT_EARS)
 		if(ears)
 			ears.adjustEarDamage(0, 30)
@@ -203,7 +203,7 @@
 			M.Stun(200)
 			M.Unconscious(80)
 		else
-			M.Jitter(500)
+			M.set_timed_status_effect(1000 SECONDS, /datum/status_effect/jitter, only_if_higher = TRUE)
 
 	log_message("Honked from [src.name]. HONK!", LOG_MECHA)
 	var/turf/T = get_turf(src)
@@ -269,7 +269,7 @@
 	projectiles_cache = 24
 	projectiles_cache_max = 96
 	harmful = TRUE
-	ammo_type = "incendiary"
+	ammo_type = MECHA_AMMO_INCENDIARY
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/silenced
 	name = "\improper S.H.H. \"Quietus\" Carbine"
@@ -294,7 +294,7 @@
 	projectiles_per_shot = 4
 	variance = 25
 	harmful = TRUE
-	ammo_type = "scattershot"
+	ammo_type = MECHA_AMMO_BUCKSHOT
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/lmg
 	name = "\improper Ultra AC 2"
@@ -310,7 +310,7 @@
 	randomspread = 1
 	projectile_delay = 2
 	harmful = TRUE
-	ammo_type = "lmg"
+	ammo_type = MECHA_AMMO_LMG
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/missile_rack
 	name = "\improper SRM-8 missile rack"
@@ -324,7 +324,7 @@
 	disabledreload = TRUE
 	equip_cooldown = 60
 	harmful = TRUE
-	ammo_type = "missiles_he"
+	ammo_type = MECHA_AMMO_MISSILE_HE
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/missile_rack/breaching
 	name = "\improper BRM-6 missile rack"
@@ -338,7 +338,7 @@
 	disabledreload = TRUE
 	equip_cooldown = 60
 	harmful = TRUE
-	ammo_type = "missiles_br"
+	ammo_type = MECHA_AMMO_MISSILE_AP
 
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/launcher
@@ -373,8 +373,8 @@
 	projectiles_cache_max = 24
 	missile_speed = 1.5
 	equip_cooldown = 60
+	ammo_type = MECHA_AMMO_FLASHBANG
 	var/det_time = 20
-	ammo_type = "flashbang"
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/launcher/flashbang/proj_init(obj/item/grenade/flashbang/F, mob/user)
 	var/turf/T = get_turf(src)
@@ -391,7 +391,7 @@
 	disabledreload = TRUE
 	projectile = /obj/item/grenade/clusterbuster
 	equip_cooldown = 90
-	ammo_type = "clusterbang"
+	ammo_type = MECHA_AMMO_CLUSTERBANG
 
 /obj/item/mecha_parts/mecha_equipment/weapon/ballistic/launcher/banana_mortar
 	name = "banana mortar"

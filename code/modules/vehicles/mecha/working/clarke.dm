@@ -24,6 +24,7 @@
 		MECHA_ARMOR = 1,
 	)
 	wreckage = /obj/structure/mecha_wreckage/clarke
+	mech_type = EXOSUIT_MODULE_CLARKE
 	enter_delay = 40
 	mecha_flags = ADDING_ACCESS_POSSIBLE | IS_ENCLOSED | HAS_LIGHTS | MMI_COMPATIBLE | OMNIDIRECTIONAL_ATTACKS
 	internals_req_access = list(ACCESS_MECH_ENGINE, ACCESS_MECH_SCIENCE, ACCESS_MECH_MINING)
@@ -49,7 +50,6 @@
 	icon = 'icons/obj/mining.dmi'
 	icon_state = "bin"
 	equipment_slot = MECHA_UTILITY
-	selectable = FALSE
 	detachable = FALSE
 	/// Var to avoid istype checking every time the topic button is pressed. This will only work inside Clarke mechs.
 	var/obj/vehicle/sealed/mecha/working/clarke/hostmech
@@ -86,10 +86,10 @@
 		return
 	var/mob/living/living_owner = owner
 	button_icon_state = "mech_search_ruins_cooldown"
-	UpdateButtonIcon()
+	UpdateButtons()
 	COOLDOWN_START(src, search_cooldown, SEARCH_COOLDOWN)
 	addtimer(VARSET_CALLBACK(src, button_icon_state, "mech_search_ruins"), SEARCH_COOLDOWN)
-	addtimer(CALLBACK(src, .proc/UpdateButtonIcon), SEARCH_COOLDOWN)
+	addtimer(CALLBACK(src, .proc/UpdateButtons), SEARCH_COOLDOWN)
 	var/obj/pinpointed_ruin
 	for(var/obj/effect/landmark/ruin/ruin_landmark as anything in GLOB.ruin_landmarks)
 		if(ruin_landmark.z != chassis.z)

@@ -80,7 +80,7 @@
 
 /obj/vehicle/sealed/mecha/ui_data(mob/user)
 	var/list/data = list()
-	var/isoperator = (user.loc == src) //maintenance mode outside of mech
+	var/isoperator = (user in occupants) //maintenance mode outside of mech
 	data["isoperator"] = isoperator
 	if(!isoperator)
 		data["name"] = name
@@ -108,13 +108,14 @@
 			data["idcard_access"] += list(list("name" = accessname, "number" = idcode))
 		return data
 	ui_view.appearance = appearance
-	var/datum/gas_mixture/int_tank_air= internal_tank?.return_air()
+	var/datum/gas_mixture/int_tank_air = internal_tank?.return_air()
 	data["name"] = name
 	data["integrity"] = atom_integrity/max_integrity
 	data["power_level"] = cell?.charge
 	data["power_max"] = cell?.maxcharge
 	data["mecha_flags"] = mecha_flags
 	data["internal_damage"] = internal_damage
+	data["airtank_present"] = !!internal_tank
 	data["air_source"] = use_internal_tank ? "Internal Airtank" : "Environment"
 	data["airtank_pressure"] = int_tank_air ? round(int_tank_air.return_pressure(), 0.01) : null
 	data["airtank_temp"] = int_tank_air?.temperature
@@ -122,6 +123,7 @@
 	data["cabin_pressure"] = round(return_pressure(), 0.01)
 	data["cabin_temp"] = return_temperature()
 	data["dna_lock"] = dna_lock
+	data["weapons_safety"] = weapons_safety
 	data["mech_view"] = ui_view.assigned_map
 	if(radio)
 		data["mech_electronics"] = list(
@@ -200,9 +202,12 @@
 	. = ..()
 	if(.)
 		return
-	if(usr.loc != src)
+	if(!(usr in occupants))
 		switch(action)
 			if("stopmaint")
+				if(construction_state > MECHA_LOCKED)
+					to_chat(usr, span_warning("You must end Maintenance Procedures first!"))
+					return
 				mecha_flags &= ~ADDING_MAINT_ACCESS_POSSIBLE
 				ui.close()
 				return FALSE
@@ -255,8 +260,7 @@
 			if("lock_req_edit")
 				mecha_flags &= ~ADDING_ACCESS_POSSIBLE
 		return TRUE
-	if(!(usr in occupants))
-		return
+	//usr is in occupants
 	switch(action)
 		if("changename")
 			var/userinput = tgui_input_text(usr, "Choose a new exosuit name", "Rename exosuit", max_length = MAX_NAME_LEN)
@@ -266,6 +270,9 @@
 				tgui_alert(usr, "You cannot set a name that contains a word prohibited in IC chat!")
 				return
 			name = userinput
+		if("toggle_safety")
+			set_safety(usr)
+			return
 		if("dna_lock")
 			var/mob/living/carbon/user = usr
 			if(!istype(user) || !user.dna)
@@ -279,6 +286,8 @@
 			tgui_alert(usr, "Enzymes detected: " + dna_lock)
 			return FALSE
 		if("toggle_airsource")
+			if(!internal_tank)
+				return
 			use_internal_tank = !use_internal_tank
 			balloon_alert(usr, "taking air from [use_internal_tank ? "internal airtank" : "environment"]")
 			log_message("Now taking air from [use_internal_tank?"internal airtank":"environment"].", LOG_MECHA)

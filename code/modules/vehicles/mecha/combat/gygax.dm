@@ -12,6 +12,7 @@
 	leg_overload_coeff = 80
 	force = 25
 	wreckage = /obj/structure/mecha_wreckage/gygax
+	mech_type = EXOSUIT_MODULE_GYGAX
 	max_equip_by_category = list(
 		MECHA_UTILITY = 1,
 		MECHA_POWER = 1,
@@ -44,7 +45,7 @@
 		chassis.movedelay = initial(chassis.movedelay)
 		chassis.step_energy_drain = chassis.normal_step_energy_drain
 		chassis.balloon_alert(owner, "you disable the overload")
-	UpdateButtonIcon()
+	UpdateButtons()
 
 /obj/vehicle/sealed/mecha/combat/gygax/dark
 	desc = "A lightweight exosuit, painted in a dark scheme. This model appears to have some modifications."

@@ -10,6 +10,7 @@
 	max_temperature = 30000
 	force = 40
 	wreckage = /obj/structure/mecha_wreckage/durand
+	mech_type = EXOSUIT_MODULE_DURAND
 	max_equip_by_category = list(
 		MECHA_UTILITY = 1,
 		MECHA_POWER = 1,
@@ -212,7 +213,7 @@ own integrity back to max. Shield is automatically dropped if we run out of powe
 	for(var/occupant in chassis.occupants)
 		var/datum/action/button = chassis.occupant_actions[occupant][/datum/action/vehicle/sealed/mecha/mech_defense_mode]
 		button.button_icon_state = "mech_defense_mode_[chassis.defense_mode ? "on" : "off"]"
-		button.UpdateButtonIcon()
+		button.UpdateButtons()
 
 	set_light_on(chassis.defense_mode)
 

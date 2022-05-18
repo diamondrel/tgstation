@@ -3,9 +3,8 @@
 	icon = 'icons/obj/clothing/under/default.dmi'
 	worn_icon = 'icons/mob/clothing/under/default.dmi'
 	body_parts_covered = CHEST|GROIN|LEGS|ARMS
-	permeability_coefficient = 0.9
 	slot_flags = ITEM_SLOT_ICLOTHING
-	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 0, ACID = 0, WOUND = 5)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 10, FIRE = 0, ACID = 0, WOUND = 5)
 	equip_sound = 'sound/items/equip/jumpsuit_equip.ogg'
 	drop_sound = 'sound/items/handling/cloth_drop.ogg'
 	pickup_sound = 'sound/items/handling/cloth_pickup.ogg'
@@ -20,7 +19,6 @@
 	var/alt_covers_chest = FALSE // for adjusted/rolled-down jumpsuits, FALSE = exposes chest and arms, TRUE = exposes arms only
 	var/obj/item/clothing/accessory/attached_accessory
 	var/mutable_appearance/accessory_overlay
-	var/mutantrace_variation = NO_MUTANTRACE_VARIATION //Are there special sprites for specific situations? Don't use this unless you need to.
 	var/freshly_laundered = FALSE
 
 /obj/item/clothing/under/Initialize(mapload)
@@ -36,7 +34,7 @@
 
 	if(damaged_clothes)
 		. += mutable_appearance('icons/effects/item_damage.dmi', "damageduniform")
-	if(HAS_BLOOD_DNA(src))
+	if(GET_ATOM_BLOOD_DNA_LENGTH(src))
 		. += mutable_appearance('icons/effects/blood.dmi', "uniformblood")
 	if(accessory_overlay)
 		. += accessory_overlay
@@ -98,9 +96,9 @@
 		if(!alt_covers_chest)
 			body_parts_covered |= CHEST
 
-	if(mutantrace_variation && ishuman(user))
+	if((supports_variations_flags & CLOTHING_DIGITIGRADE_VARIATION) && ishuman(user))
 		var/mob/living/carbon/human/H = user
-		if(DIGITIGRADE in H.dna.species.species_traits)
+		if(H.dna.species.bodytype & BODYTYPE_DIGITIGRADE)
 			adjusted = DIGITIGRADE_STYLE
 		H.update_inv_w_uniform()
 
@@ -323,7 +321,7 @@
 				return adjusted
 			for(var/zone in list(BODY_ZONE_CHEST, BODY_ZONE_L_ARM, BODY_ZONE_R_ARM)) // ugly check to make sure we don't reenable protection on a disabled part
 				if(damage_by_parts[zone] > limb_integrity)
-					for(var/part in zone2body_parts_covered(zone))
+					for(var/part in body_zone2cover_flags(zone))
 						body_parts_covered &= part
 	return adjusted
 
