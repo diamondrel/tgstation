@@ -1,21 +1,28 @@
 /datum/interrogation
-	var/interrostage = 1
-	var/goalrangelow = 25
-	var/goalrangehigh = 75
-	var/goalrangeamount=goalrangehigh-goalrangelow
-	var/perfectrangelow = 38
-	var/perfectrangehigh = 62
-	var/mildtraumarangelow = 50
-	var/mildtraumarangehigh = 75
+	var/middle = 50
+	var/offset = 25
+	var/gstretch = 1
+	var/pstretch = 0.5
+	var/mtstretch = 0.5
+	// ranges
+	var/lowgoal = middle-offset*gstretch
+	var/highgoal = middle+offset*gstretch
+	var/lowperfect = middle+offset*pstretch
+	var/highperfect = middle-offset*pstretch
+	// range points (end of a parent range is the end of the child range)
+	// other end is the closest goal point
+	var/lowmildtrauma = middle-offset*mtstretch
+	var/highmildtrauma = middle+offset*mtstretch
+	// other end is the closest end of the top level range (0-100)
 	var/severetrauma = 90
 	var/criticalfail = 10
 
-/datum/interrogation/proc/can_start(mob/user, mob/living/target, obj/item/tool)
+/datum/interrogation/proc/can_start(mob/user, mob/living/target)
 	if(target.stat == UNCONSCIOUS)
 		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who softly grunts in response."), span_warning("[target] merely grunts in response, they appear to be unconscious."),\
 		span_hear("You hear muffled grunts and a [tool] clicking on, followed by a sigh."))
 		return FALSE
-	if(target.stat == DEAD)
+	if(!isliving(target))
 		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s head, who doesn't respond."), span_warning("Dead men tell no tales."),\
 		span_hear("You hear a [tool] clicking on, followed by a sigh."))
 		return FALSE
@@ -27,12 +34,8 @@
 		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who kicks and screams."), span_warning("[target] screams, you've broken them already."),\
 		span_hear("You hear screaming and a [tool] clicking on, followed by a sigh."))
 		return FALSE
-	return TRUE
 
-// /datum/interrogation/proc/isantag(mob/living/target,var/antagtype)
-//	return target.mind.has_antag_datum(antagtype)
-
-/datum/interrogation/proc/interrogation_selection(mob/user, mob/living/target,obj/item/tool, datum/tgui/ui)
+/datum/interrogation/proc/interrogation_selection(mob/user, mob/living/target, obj/item/tool)
 	var/findtraitor = TRUE
 	if(can_start(user,target,tool))
 		if(target.interrostage==1)

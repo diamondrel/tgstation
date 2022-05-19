@@ -22,6 +22,7 @@
 
 /obj/item/flashlight/Initialize(mapload)
 	. = ..()
+	AddComponent(/datum/component/interro_initiator)
 	if(icon_state == "[initial(icon_state)]-on")
 		on = TRUE
 	update_brightness()
@@ -162,6 +163,7 @@
 	else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
 		user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
 			span_notice("You push the [src] reaaalll close to [M]'s head."))
+		ui_interact(user, datum/tgui/ui)
 	else
 		return ..()
 
@@ -185,11 +187,9 @@
   if(.)
     return
   if(action == "verify")
-    var/new_color = params["color"]
-    if(!(color in allowed_coors))
-      return FALSE
-    color = new_color
-    . = TRUE
+    var/current_target=params["target"]
+    .=TRUE
+  interrogation_selector(mob/user, mob/living/target, obj/item/tool, )
 
 /obj/item/flashlight/pen
 	name = "penlight"
