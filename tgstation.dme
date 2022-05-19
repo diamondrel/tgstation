@@ -756,6 +756,7 @@
 #include "code\datums\components\holderloving.dm"
 #include "code\datums\components\igniter.dm"
 #include "code\datums\components\infective.dm"
+#include "code\datums\components\interro_initiator.dm"
 #include "code\datums\components\irradiated.dm"
 #include "code\datums\components\itempicky.dm"
 #include "code\datums\components\jousting.dm"
