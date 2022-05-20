@@ -1,4 +1,10 @@
-/datum/interrogation
+/datum/detectivework/interrogation
+	var/name = "interrogation"
+	var/desc = "interrogation description"
+	var/goal = LOCATION
+	var/antag = INTERRO_CULT
+	var/mob/living/carbon/target
+	var/list/next_interrogations = list()
 	var/middle = 50
 	var/offset = 25
 	var/gstretch = 1
@@ -17,25 +23,40 @@
 	var/severetrauma = 90
 	var/criticalfail = 10
 
-/datum/interrogation/proc/can_start(mob/user, mob/living/target)
+/datum/detectivework/interrogation/New(atom/interro_target, interro_type, interro_antag, next_interros)
+	..()
+	if(!interro_target)
+		return
+	target=interro_target
+	target.interrogations+=src
+	if(next_interros)
+		next_interrogations=next_interros
+	if(!interro_type)
+		return
+	goal=interro_type
+	if(!interro_antag)
+		return
+	antag=interro_antag
+
+	SEND_SIGNAL(interro_target, COSMIG_MOB_INTERRO_STARTED, interro_type, interro_antag, next_interros)
+
+/datum/detectivework/interrogation/Del()
+	for(var/i_one in target.interrogations)
+		i_one=null
+	return ..()
+
+/datum/detectivework/interrogation/proc/can_start(mob/user, mob/living/target)
 	if(target.stat == UNCONSCIOUS)
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who softly grunts in response."), span_warning("[target] merely grunts in response, they appear to be unconscious."),\
-		span_hear("You hear muffled grunts and a [tool] clicking on, followed by a sigh."))
 		return FALSE
 	if(!isliving(target))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s head, who doesn't respond."), span_warning("Dead men tell no tales."),\
-		span_hear("You hear a [tool] clicking on, followed by a sigh."))
 		return FALSE
 	if(!(target in GLOB.alive_player_list))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who stares blankly past."), span_warning("[target] stares right through you and appears completely unresponsive to anything. They may snap out of it soon."),\
-		span_hear("You hear a [tool] clicking on, followed by a sigh."))
 		return FALSE
 	if(HAS_TRAIT(target,TRAIT_BROKEN))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who kicks and screams."), span_warning("[target] screams, you've broken them already."),\
-		span_hear("You hear screaming and a [tool] clicking on, followed by a sigh."))
 		return FALSE
+	return TRUE
 
-/datum/interrogation/proc/interrogation_selection(mob/user, mob/living/target, obj/item/tool)
+/datum/detectivework/interrogation/proc/interrogation_selection(mob/user, mob/living/target, obj/item/tool)
 	var/findtraitor = TRUE
 	if(can_start(user,target,tool))
 		if(target.interrostage==1)
@@ -69,18 +90,18 @@
 		ui_interact(user,src)
 	return
 
-/datum/interrogation/ui_interact(mob/user,datum/tgui/ui)
+/datum/detectivework/interrogation/ui_interact(mob/user,datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if (!ui)
 		ui = new(user, src, "InterrogationInitiator")
 		ui.open()
 
-/datum/interrogation/ui_data(mob/user)
+/datum/detectivework/interrogation/ui_data(mob/user)
 	var/list/data = list()
 	data["stage"] = interrostage
 	//// CONTINUE ADDING UI
 
-/*/datum/interrogation/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+/*/datum/detectivework/interrogation/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if (.)
 		return .
