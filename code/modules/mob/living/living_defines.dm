@@ -68,6 +68,12 @@
 
 	var/list/quirks = list()
 
+	var/being_interrogated = FALSE ///if the mob is being interrogated at the current moment
+
+	var/interro_resistance=1 ///mob's resistence to interrogation
+
+	var/breaking_point_dist=100 ///how far from cracking the mob is
+
 	var/list/surgeries = list() ///a list of surgery datums. generally empty, they're added when the player wants them.
 	///Mob specific surgery speed modifier
 	var/mob_surgery_speed_mod = 1

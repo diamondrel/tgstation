@@ -11,8 +11,6 @@
 // BEGIN_PREFERENCES
 #define DEBUG
 // END_PREFERENCES
-
-// BEGIN_INCLUDE
 #include "_maps\_basemap.dm"
 #include "code\_compile_options.dm"
 #include "code\_debugger.dm"
@@ -4490,4 +4488,11 @@
 #include "interface\menu.dm"
 #include "interface\stylesheet.dm"
 #include "interface\skin.dmf"
+// BEGIN_INCLUDE
+#include "code\__DEFINES\interrogation.dm"
+#include "code\__DEFINES\dcs\signals\signals_interrogation.dm"
+#include "code\modules\detectivework\interrogation\interrogation.dm"
+#include "code\modules\detectivework\interrogation\factions\_interro_factions_and_information.dm"
+#include "code\modules\detectivework\interrogation\factions\factions_and_information.dm"
+#include "code\modules\detectivework\interrogation\factions\helpers.dm"
 // END_INCLUDE

@@ -89,6 +89,8 @@
 #define REAGENT_NO_RANDOM_RECIPE (1<<7)
 ///Does this reagent clean things?
 #define REAGENT_CLEANS (1<<8)
+///Does this reagent give a boost to interrogation
+#define TRUTH_SERUM (1<<9)
 
 //Chemical reaction flags, for determining reaction specialties
 ///Convert into impure/pure on reaction completion

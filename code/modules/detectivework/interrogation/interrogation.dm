@@ -1,11 +1,14 @@
 /datum/detectivework/interrogation
 	var/name = "interrogation"
 	var/desc = "interrogation description"
-	var/goal = LOCATION
-	var/antag = INTERRO_CULT
+	var/info = INFO_INTERRO_TYPE_BASE
+	var/status = 1
+	var/faction = FACTION_INTERRO_TYPE_TRAITOR
 	var/mob/living/carbon/target
+	var/step_in_progress
+	var/list/target_mobtypes = list(/mob/living/carbon/human)
 	var/list/next_interrogations = list()
-	var/middle = 50
+	/*var/middle = 50
 	var/offset = 25
 	var/gstretch = 1
 	var/pstretch = 0.5
@@ -21,34 +24,32 @@
 	var/highmildtrauma = middle+offset*mtstretch
 	// other end is the closest end of the top level range (0-100)
 	var/severetrauma = 90
-	var/criticalfail = 10
+	var/criticalfail = 10*/
 
-/datum/detectivework/interrogation/New(atom/interro_target, interro_type, interro_antag, next_interros)
+/datum/detectivework/interrogation/New(atom/interro_target, interro_faction, interro_info)
 	..()
 	if(!interro_target)
 		return
-	target=interro_target
-	target.interrogations+=src
-	if(next_interros)
-		next_interrogations=next_interros
-	if(!interro_type)
-		return
-	goal=interro_type
-	if(!interro_antag)
-		return
-	antag=interro_antag
 
-	SEND_SIGNAL(interro_target, COSMIG_MOB_INTERRO_STARTED, interro_type, interro_antag, next_interros)
+	if(!interro_faction)
+		return
+	faction=interro_faction
 
-/datum/detectivework/interrogation/Del()
-	for(var/i_one in target.interrogations)
-		i_one=null
+	if(!interro_info)
+		return
+	info = interro_info
+
+	//SEND_SIGNAL(interro_target, COMSIG_MOB_INTERRO_STARTED, interro_info, interro_faction)
+
+/datum/detectivework/interrogation/Destroy()
+	if(target)
+		target.being_interrogated = FALSE
 	return ..()
 
 /datum/detectivework/interrogation/proc/can_start(mob/user, mob/living/target)
 	if(target.stat == UNCONSCIOUS)
 		return FALSE
-	if(!isliving(target))
+	if(target.stat == DEAD)
 		return FALSE
 	if(!(target in GLOB.alive_player_list))
 		return FALSE
@@ -56,7 +57,7 @@
 		return FALSE
 	return TRUE
 
-/datum/detectivework/interrogation/proc/interrogation_selection(mob/user, mob/living/target, obj/item/tool)
+/*/datum/detectivework/interrogation/proc/interrogation_selection(mob/user, mob/living/target, obj/item/tool)
 	var/findtraitor = TRUE
 	if(can_start(user,target,tool))
 		if(target.interrostage==1)
@@ -89,6 +90,7 @@
 				menu.b2(interro_selector(target,"uplink","hard"),"Attempt to extract the uplink code used by this operative")
 		ui_interact(user,src)
 	return
+*/
 
 /datum/detectivework/interrogation/ui_interact(mob/user,datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
@@ -96,9 +98,8 @@
 		ui = new(user, src, "InterrogationInitiator")
 		ui.open()
 
-/datum/detectivework/interrogation/ui_data(mob/user)
-	var/list/data = list()
-	data["stage"] = interrostage
+///datum/detectivework/interrogation/ui_data(mob/user)
+	//var/list/data = list()
 	//// CONTINUE ADDING UI
 
 /*/datum/detectivework/interrogation/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)

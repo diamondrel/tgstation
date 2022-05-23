@@ -147,16 +147,16 @@
 						to_chat(user, span_notice("[M] has [pill_count] pill[pill_count > 1 ? "s" : ""] implanted in [their] teeth."))
 			if(BODY_ZONE_HEAD)
 				if (HAS_TRAIT(M, TRAIT_RESTRAINED))
-					if(!(target in GLOB.alive_player_list))
+					if(!(M in GLOB.alive_player_list))
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who stares blankly past."), span_warning("[M] stares right through you and appears completely unresponsive to anything. They may snap out of it soon."),\
 						span_hear("You hear a [src] clicking on, followed by a sigh."))
-					if(target.stat == UNCONSCIOUS)
+					if(M.stat == UNCONSCIOUS)
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who softly grunts in response."), span_warning("[M] merely grunts in response, they appear to be unconscious."),\
 						span_hear("You hear muffled grunts and a [src] clicking on, followed by a sigh."))
-					else if(!isliving(target))
+					else if(M.stat == DEAD)
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s head, who doesn't respond."), span_warning("Dead men tell no tales."),\
 						span_hear("You hear a [src] clicking on, followed by a sigh."))
-					if(HAS_TRAIT(target,TRAIT_BROKEN))
+					if(HAS_TRAIT(M,TRAIT_BROKEN))
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who kicks and screams."), span_warning("[M] screams, you've broken them already."),\
 						span_hear("You hear screaming and a [src] clicking on, followed by a sigh."))
 	//else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
@@ -174,10 +174,9 @@
 
 /obj/item/flashlight/ui_data(mob/user)
   var/list/data = list()
-  data["name"] = name
+  /*data["name"] = name
   data["target"] = target
-  data["type"] = type
-  data["difficulty"] = difficulty
+  data["type"] = type*/
 
   return data
 
@@ -186,7 +185,7 @@
   if(.)
     return
   if(action == "verify")
-    var/current_target=params["target"]
+    //var/current_target=params["target"]
     .=TRUE
   //interrogation_selector(mob/user, mob/living/target, obj/item/tool)
 
