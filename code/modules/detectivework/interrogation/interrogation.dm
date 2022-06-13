@@ -1,5 +1,14 @@
-/datum/interrogation
-	var/middle = 50
+/datum/detectivework/interrogation
+	var/name = "interrogation"
+	var/desc = "interrogation description"
+	var/info = INFO_INTERRO_TYPE_BASE
+	var/status = 1
+	var/faction = FACTION_INTERRO_TYPE_TRAITOR
+	var/mob/living/carbon/target
+	var/step_in_progress
+	var/list/target_mobtypes = list(/mob/living/carbon/human)
+	var/list/next_interrogations = list()
+	/*var/middle = 50
 	var/offset = 25
 	var/gstretch = 1
 	var/pstretch = 0.5
@@ -15,27 +24,40 @@
 	var/highmildtrauma = middle+offset*mtstretch
 	// other end is the closest end of the top level range (0-100)
 	var/severetrauma = 90
-	var/criticalfail = 10
+	var/criticalfail = 10*/
 
-/datum/interrogation/proc/can_start(mob/user, mob/living/target)
+/datum/detectivework/interrogation/New(atom/interro_target, interro_faction, interro_info)
+	..()
+	if(!interro_target)
+		return
+
+	if(!interro_faction)
+		return
+	faction=interro_faction
+
+	if(!interro_info)
+		return
+	info = interro_info
+
+	//SEND_SIGNAL(interro_target, COMSIG_MOB_INTERRO_STARTED, interro_info, interro_faction)
+
+/datum/detectivework/interrogation/Destroy()
+	if(target)
+		target.being_interrogated = FALSE
+	return ..()
+
+/datum/detectivework/interrogation/proc/can_start(mob/user, mob/living/target)
 	if(target.stat == UNCONSCIOUS)
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who softly grunts in response."), span_warning("[target] merely grunts in response, they appear to be unconscious."),\
-		span_hear("You hear muffled grunts and a [tool] clicking on, followed by a sigh."))
 		return FALSE
-	if(!isliving(target))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s head, who doesn't respond."), span_warning("Dead men tell no tales."),\
-		span_hear("You hear a [tool] clicking on, followed by a sigh."))
+	if(target.stat == DEAD)
 		return FALSE
 	if(!(target in GLOB.alive_player_list))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who stares blankly past."), span_warning("[target] stares right through you and appears completely unresponsive to anything. They may snap out of it soon."),\
-		span_hear("You hear a [tool] clicking on, followed by a sigh."))
 		return FALSE
 	if(HAS_TRAIT(target,TRAIT_BROKEN))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who kicks and screams."), span_warning("[target] screams, you've broken them already."),\
-		span_hear("You hear screaming and a [tool] clicking on, followed by a sigh."))
 		return FALSE
+	return TRUE
 
-/datum/interrogation/proc/interrogation_selection(mob/user, mob/living/target, obj/item/tool)
+/*/datum/detectivework/interrogation/proc/interrogation_selection(mob/user, mob/living/target, obj/item/tool)
 	var/findtraitor = TRUE
 	if(can_start(user,target,tool))
 		if(target.interrostage==1)
@@ -68,19 +90,19 @@
 				menu.b2(interro_selector(target,"uplink","hard"),"Attempt to extract the uplink code used by this operative")
 		ui_interact(user,src)
 	return
+*/
 
-/datum/interrogation/ui_interact(mob/user,datum/tgui/ui)
+/datum/detectivework/interrogation/ui_interact(mob/user,datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if (!ui)
 		ui = new(user, src, "InterrogationInitiator")
 		ui.open()
 
-/datum/interrogation/ui_data(mob/user)
-	var/list/data = list()
-	data["stage"] = interrostage
+///datum/detectivework/interrogation/ui_data(mob/user)
+	//var/list/data = list()
 	//// CONTINUE ADDING UI
 
-/*/datum/interrogation/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+/*/datum/detectivework/interrogation/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()
 	if (.)
 		return .

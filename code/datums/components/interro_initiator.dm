@@ -1,4 +1,4 @@
-/// Allows an item to  be used to initiate initiator.
+/// Allows an item to  be used to initiate interrogation.
 /datum/component/interro_initiator
 	/// The currently selected target that the user is interrogating
 	var/datum/weakref/interro_target_ref
@@ -25,9 +25,6 @@
 	unregister_signals()
 
 /datum/component/interro_initiator/proc/unregister_signals()
-	var/mob/living/last_user = last_user_ref?.resolve()
-	if (!isnull(last_user_ref))
-		UnregisterSignal(last_user, COMSIG_MOB_SELECTED_ZONE_SET)
 
 	var/mob/living/interro_target = interro_target_ref?.resolve()
 	if (!isnull(interro_target_ref))
@@ -36,31 +33,18 @@
 // Initiates interrogation
 /datum/component/interro_initiator/proc/initiate_interro_moment(datum/source, atom/target, mob/user)
 	SIGNAL_HANDLER
-	if(target.stat == UNCONSCIOUS)
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who softly grunts in response."), span_warning("[target] merely grunts in response, they appear to be unconscious."),\
-		span_hear("You hear muffled grunts and a [tool] clicking on, followed by a sigh."))
-		return
-	if(!isliving(target))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s head, who doesn't respond."), span_warning("Dead men tell no tales."),\
-		span_hear("You hear a [tool] clicking on, followed by a sigh."))
-		return
-	if(!(target in GLOB.alive_player_list))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who stares blankly past."), span_warning("[target] stares right through you and appears completely unresponsive to anything. They may snap out of it soon."),\
-		span_hear("You hear a [tool] clicking on, followed by a sigh."))
-		return
-	if(HAS_TRAIT(target,TRAIT_BROKEN))
-		user.visible_message(span_notice("[user] holds the [tool] close to [target]'s face, who kicks and screams."), span_warning("[target] screams, you've broken them already."),\
-		span_hear("You hear screaming and a [tool] clicking on, followed by a sigh."))
+	if(!isliving(target)||!(target in GLOB.alive_player_list)||HAS_TRAIT(target,TRAIT_BROKEN))
 		return
 	INVOKE_ASYNC(src, .proc/do_initiate_interro_moment, target, user)
 	return COMPONENT_CANCEL_ATTACK_CHAIN
 
 /datum/component/interro_initiator/proc/do_initiate_interro_moment(mob/living/target, mob/user)
-	var/datum/interrogation/current_interro
+	/*var/datum/detectivework/interrogation/current_interro
+	current_interro = target.interro
 
 	if (!isnull(current_interro) && !current_interro.step_in_progress)
 		attempt_cancel_interro(current_interro, target, user)
-		return
+		return*/
 
 	var/list/available_interro = get_available_interro(user, target)
 
@@ -84,46 +68,36 @@
 /datum/component/interro_initiator/proc/get_available_interro(mob/user, mob/living/target)
 	var/list/available_interro = list()
 
-	var/mob/living/carbon/carbon_target
-	if (iscarbon(target))
-		carbon_target = target
-
-	for(var/datum/interrogation/interro as anything in GLOB.interro_list)
+	for(var/datum/detectivework/interrogation/interro as anything in GLOB.interro_list)
 		if(!HAS_TRAIT(target, TRAIT_RESTRAINED))
 			continue
-		if(!interrogation.can_start(user, target))
+		if(!interro.can_start(user, target))
 			continue
-		for(var/path in interrogation.target_mobtypes)
+		for(var/path in interro.target_mobtypes)
 			if(istype(target, path))
 				available_interro += interro
 				break
 		return available_interro
 
 // De-initialzes the interrogation
-/datum/component/interro_initiator/proc/attempt_cancel_interro(datum/interrogation/the_interro, mob/living/target, mob/user)
+/*/datum/component/interro_initiator/proc/attempt_cancel_interro(datum/detectivework/interrogation/the_interro, mob/living/target, mob/user)
 
 	if(the_interro.status == 1)
-		patient.interro -= the_interro
-		REMOVE_TRAIT(patient, TRAIT_ALLOWED_HONORBOUND_ATTACK, type)
+		target.being_interrogated = FALSE
 		user.visible_message(
 			span_notice("[user] rips the [parent] away from [target]'s face."),
 			span_notice("You rip the [parent] away from [target]'s face."),
-		)
+			)
 
-		patient.balloon_alert(user, "stopped interrogating you")
-
-		qdel(the_interro)
+		target.balloon_alert(user, "stopped interrogating you")
 		return
 
 	if(!the_interro.can_cancel)
 		return
 
-	patient.interro -= the_interro
-	REMOVE_TRAIT(patient, TRAIT_ALLOWED_HONORBOUND_ATTACK, ELEMENT_TRAIT(type))
-
-	qdel(the_interro)
-
-/datum/component/interro_initiator/proc/on_mob_interro_started(mob/source, datum/interrogation/interrogation)
+	target.being_interrogated = FALSE
+*/
+/datum/component/interro_initiator/proc/on_mob_interro_started(mob/source, datum/detectivework/interrogation/interrogation)
 	SIGNAL_HANDLER
 
 	var/mob/living/last_user = last_user_ref.resolve()
@@ -150,8 +124,8 @@
 	if (isnull(interro_target))
 		return TRUE
 		if (action=="start_interro")
-			for (var/datum/interrogation/interrogation as anything in get_available_interro(user, interro_target))
-				if (interrogation.name == params["interro_name"])
+			for (var/datum/detectivework/interrogation/interro as anything in get_available_interro(user, interro_target))
+				if (interro.name == params["interro_name"])
 					try_choose_interro(user, interro_target, interro)
 					return TRUE
 
@@ -165,9 +139,9 @@
 
 	var/list/interro = list()
 	if (!isnull(interro_target))
-		for (var/datum/interrogation/interro as anything in get_available_interro(user, interro_target))
+		for (var/datum/detectivework/interrogation/all_interros as anything in get_available_interro(user, interro_target))
 			var/list/interro_info = list(
-				"name" = interrogation.name,
+				"name" = all_interros.name,
 			)
 
 			interro += list(interro_info)
@@ -206,20 +180,15 @@
 		return FALSE
 
 	// While we were choosing, another interro was started at the same location
-	if (target.beingInterrogated)
+	if (target.being_interrogated)
 		return FALSE
 
 	return TRUE
 
-/datum/component/interro_initiator/proc/try_choose_interro(mob/user, mob/living/target, datum/interrogation/interrogation)
+/datum/component/interro_initiator/proc/try_choose_interro(mob/user, mob/living/target, datum/detectivework/interrogation/interro)
 	if (!can_start_interro(user, target))
-		// This could have a more detailed message, but the UI closes when this is true anyway, so
-		// if it ever comes up, it'll be because of lag.
 		target.balloon_alert(user, "can't start the interrogation!")
 		return
-
-	if (iscarbon(target))
-		var/mob/living/carbon/carbon_target = target
 
 	if (!HAS_TRAIT(target, TRAIT_RESTRAINED))
 		target.balloon_alert(user, "patient is not restrained!")
@@ -231,21 +200,11 @@
 
 	ui_close()
 
-	var/datum/interrogation/procedure = new interrogation.type(target,interro_type,stage)
-	ADD_TRAIT(target, TRAIT_ALLOWED_HONORBOUND_ATTACK, type)
-
-	target.balloon_alert(user, "starting \"[lowertext(procedure.name)]\"")
+	target.balloon_alert(user, "starting interrogation")
 
 	user.visible_message(
-		span_notice("[user] drapes [parent] over [target]'s [parse_zone(selected_zone)] to prepare for interro."),
-		span_notice("You drape [parent] over [target]'s [parse_zone(selected_zone)] to prepare for \an [procedure.name]."),
+		span_notice("[user] shoves [parent] into [target]'s face and begins grilling [target.p_them()]."),
+		span_notice("You shove [parent] into [target]'s face to prepare to grill [target.p_them()]."),
 	)
 
-	log_combat(user, target, "operated on", null, "(OPERATION TYPE: [procedure.name]) (TARGET AREA: [selected_zone])")
-
-/datum/component/interro_initiator/proc/interro_needs_exposure(datum/interrogation/interro, mob/living/target)
-	var/mob/living/user = last_user_ref?.resolve()
-	if (isnull(user))
-		return FALSE
-
-	return !interro.ignore_clothes && !get_location_accessible(target, user.zone_selected)
+	log_combat(user, target, "interrogated for", null, "(OPERATION TYPE: [interro.name]) (SUSPECTED FACTION: [interro.faction]) (TARGET INFO: [interro.info])")

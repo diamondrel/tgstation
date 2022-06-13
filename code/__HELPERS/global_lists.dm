@@ -46,6 +46,11 @@
 		GLOB.surgeries_list += new path()
 	sort_list(GLOB.surgeries_list, /proc/cmp_typepaths_asc)
 
+	//Interrogations
+	for(var/path in subtypesof(/datum/detectivework/interrogation))
+		GLOB.interro_list+= new path()
+	sort_list(GLOB.interro_list, /proc/cmp_typepaths_asc)
+
 	// Hair Gradients - Initialise all /datum/sprite_accessory/hair_gradient into an list indexed by gradient-style name
 	for(var/path in subtypesof(/datum/sprite_accessory/gradient))
 		var/datum/sprite_accessory/gradient/gradient = new path()
