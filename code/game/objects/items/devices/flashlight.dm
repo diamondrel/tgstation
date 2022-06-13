@@ -22,7 +22,7 @@
 
 /obj/item/flashlight/Initialize(mapload)
 	. = ..()
-	AddComponent(/datum/component/interro_initiator)
+	// AddComponent(datum/component/interro_initiator)
 	if(icon_state == "[initial(icon_state)]-on")
 		on = TRUE
 	update_brightness()
@@ -160,12 +160,12 @@
 						to_chat(user, span_notice("[M] doesn't have any organs in [their] mouth."))
 					if(pill_count)
 						to_chat(user, span_notice("[M] has [pill_count] pill[pill_count > 1 ? "s" : ""] implanted in [their] teeth."))
-	else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
-		user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
-			span_notice("You push the [src] reaaalll close to [M]'s head."))
-		ui_interact(user, datum/tgui/ui)
-	else
-		return ..()
+	// else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
+	// 	user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
+	// 		span_notice("You push the [src] reaaalll close to [M]'s head."))
+	// 	ui_interact(user, datum/tgui/ui)
+	// else
+	// 	return ..()
 
 /obj/item/flashlight/ui_interact(mob/user, datum/tgui/ui)
   ui = SStgui.try_update_ui(user, src, ui)
@@ -174,22 +174,22 @@
     ui.open()
 
 /obj/item/flashlight/ui_data(mob/user)
-  var/list/data = list()
-  data["name"] = name
-  data["target"] = target
-  data["type"] = type
-  data["difficulty"] = difficulty
+  //var/list/data = list()
+  //data["name"] = name
+  //data["target"] = target
+  //data["type"] = type
+  //data["difficulty"] = difficulty
 
-  return data
+  //return data
 
 /obj/item/flashlight/ui_act(action, params)
-  . = ..()
-  if(.)
-    return
-  if(action == "verify")
-    var/current_target=params["target"]
-    .=TRUE
-  interrogation_selector(mob/user, mob/living/target, obj/item/tool, )
+  //. = ..()
+  //if(.)
+  //  return
+  //if(action == "verify")
+  //  var/current_target=params["target"]
+  //  .=TRUE
+  //interrogation_selector(mob/user, mob/living/target, obj/item/tool, )
 
 /obj/item/flashlight/pen
 	name = "penlight"
