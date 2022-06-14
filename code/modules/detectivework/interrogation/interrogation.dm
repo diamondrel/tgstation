@@ -2,7 +2,7 @@
 	var/name = "interrogation"
 	var/desc = "interrogation description"
 	var/info = INFO_INTERRO_TYPE_BASE
-	var/status = 1
+	var/stage = 1
 	var/faction = FACTION_INTERRO_TYPE_TRAITOR
 	var/mob/living/carbon/target
 	var/step_in_progress
@@ -30,7 +30,7 @@
 	..()
 	if(!interro_target)
 		return
-
+	target=interro_target
 	if(!interro_faction)
 		return
 	faction=interro_faction
@@ -39,7 +39,7 @@
 		return
 	info = interro_info
 
-	//SEND_SIGNAL(interro_target, COMSIG_MOB_INTERRO_STARTED, interro_info, interro_faction)
+	SEND_SIGNAL(interro_target, COMSIG_MOB_INTERRO_STARTED, interro_info, interro_faction)
 
 /datum/detectivework/interrogation/Destroy()
 	if(target)
@@ -51,7 +51,7 @@
 		return FALSE
 	if(target.stat == DEAD)
 		return FALSE
-	if(!(target in GLOB.alive_player_list))
+	if(!isnull(target.mind))
 		return FALSE
 	if(HAS_TRAIT(target,TRAIT_BROKEN))
 		return FALSE
@@ -89,67 +89,4 @@
 				menu.b1(interro_selector(target,"phrases","medium"),"Attempt to learn of a code phrase used by syndicate operatives to communicate")
 				menu.b2(interro_selector(target,"uplink","hard"),"Attempt to extract the uplink code used by this operative")
 		ui_interact(user,src)
-	return
-*/
-
-/datum/detectivework/interrogation/ui_interact(mob/user,datum/tgui/ui)
-	ui = SStgui.try_update_ui(user, src, ui)
-	if (!ui)
-		ui = new(user, src, "InterrogationInitiator")
-		ui.open()
-
-///datum/detectivework/interrogation/ui_data(mob/user)
-	//var/list/data = list()
-	//// CONTINUE ADDING UI
-
-/*/datum/detectivework/interrogation/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
-	. = ..()
-	if (.)
-		return .
-
-
-/datum/component/surgery_initiator/ui_assets(mob/user)
-	return list(
-		get_asset_datum(/datum/asset/simple/body_zones),
-	)
-
-/datum/component/surgery_initiator/ui_data(mob/user)
-	var/mob/living/surgery_target = surgery_target_ref.resolve()
-
-	var/list/surgeries = list()
-	if (!isnull(surgery_target))
-		for (var/datum/surgery/surgery as anything in get_available_surgeries(user, surgery_target))
-			var/list/surgery_info = list(
-				"name" = surgery.name,
-			)
-
-			if (surgery_needs_exposure(surgery, surgery_target))
-				surgery_info["blocked"] = TRUE
-
-			surgeries += list(surgery_info)
-
-	return list(
-		"selected_zone" = user.zone_selected,
-		"target_name" = surgery_target?.name,
-		"surgeries" = surgeries,
-	)
-
-/datum/component/surgery_initiator/ui_close(mob/user)
-	unregister_signals()
-	surgery_target_ref = null
-
-	return ..()
-
-/datum/component/surgery_initiator/ui_status(mob/user, datum/ui_state/state)
-	var/obj/item/item_parent = parent
-	if (user != item_parent.loc)
-		return UI_CLOSE
-
-	var/mob/living/surgery_target = surgery_target_ref?.resolve()
-	if (isnull(surgery_target))
-		return UI_CLOSE
-
-	if (!can_start_surgery(user, surgery_target))
-		return UI_CLOSE
-
-	return ..()*/
+	return*/

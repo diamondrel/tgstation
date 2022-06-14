@@ -3,7 +3,7 @@ import { resolveAsset } from '../../assets';
 import { useBackend } from '../../backend';
 import { Box, Button, Section, Stack } from '../../components';
 import { MutationInfo } from './MutationInfo';
-import { CLEAR_GENE, GENE_COLORS, MUT_NORMAL, NEXT_GENE, PREV_GENE, SUBJECT_DEAD, SUBJECT_TRANSFORMING } from './constants';
+import { GENES, GENE_COLORS, MUT_NORMAL, SUBJECT_DEAD, SUBJECT_TRANSFORMING } from './constants';
 
 const GenomeImage = (props, context) => {
   const { url, selected, onClick } = props;
@@ -26,8 +26,9 @@ const GenomeImage = (props, context) => {
 };
 
 const GeneCycler = (props, context) => {
-  const { act } = useBackend(context);
-  const { alias, gene, index, disabled, ...rest } = props;
+  const { gene, onChange, disabled, ...rest } = props;
+  const length = GENES.length;
+  const index = GENES.indexOf(gene);
   const color = (disabled && GENE_COLORS['X']) || GENE_COLORS[gene];
   return (
     <Button
@@ -35,31 +36,27 @@ const GeneCycler = (props, context) => {
       color={color}
       onClick={e => {
         e.preventDefault();
-        if (e.ctrlKey) {
-          act('pulse_gene', {
-            pos: index + 1,
-            pulseAction: CLEAR_GENE,
-            alias: alias,
-          });
+        if (!onChange) {
           return;
         }
-
-        act('pulse_gene', {
-          pos: index + 1,
-          pulseAction: NEXT_GENE,
-          alias: alias,
-        });
-
-        return;
+        if (index === -1) {
+          onChange(e, GENES[0]);
+          return;
+        }
+        const nextGene = GENES[(index + 1) % length];
+        onChange(e, nextGene);
       }}
       oncontextmenu={e => {
         e.preventDefault();
-
-        act('pulse_gene', {
-          pos: index + 1,
-          pulseAction: PREV_GENE,
-          alias: alias,
-        });
+        if (!onChange) {
+          return;
+        }
+        if (index === -1) {
+          onChange(e, GENES[length - 1]);
+          return;
+        }
+        const prevGene = GENES[(index - 1 + length) % length];
+        onChange(e, prevGene);
       }}>
       {gene}
     </Button>
@@ -68,6 +65,8 @@ const GeneCycler = (props, context) => {
 
 const GenomeSequencer = (props, context) => {
   const { mutation } = props;
+  const { data, act } = useBackend(context);
+  const { jokerActive } = data.view;
   if (!mutation) {
     return (
       <Box color="average">
@@ -102,8 +101,32 @@ const GenomeSequencer = (props, context) => {
             : false
         }
         gene={gene}
-        index={i}
-        alias={mutation.Alias} />
+        onChange={(e, nextGene) => {
+          if (e.ctrlKey) {
+            act('pulse_gene', {
+              pos: i + 1,
+              gene: 'X',
+              alias: mutation.Alias,
+            });
+            return;
+          }
+          if (jokerActive) {
+            act('pulse_gene', {
+              pos: i + 1,
+              gene: 'J',
+              alias: mutation.Alias,
+            });
+            act('set_view', {
+              jokerActive: '',
+            });
+            return;
+          }
+          act('pulse_gene', {
+            pos: i + 1,
+            gene: nextGene,
+            alias: mutation.Alias,
+          });
+        }} />
     );
     buttons.push(button);
   }

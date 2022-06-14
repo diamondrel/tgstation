@@ -18,10 +18,12 @@ export type FlexProps = BoxProps & {
 export const computeFlexClassName = (props: FlexProps) => {
   return classes([
     'Flex',
+    Byond.IS_LTE_IE10 && (
+      props.direction === 'column'
+        ? 'Flex--iefix--column'
+        : 'Flex--iefix'
+    ),
     props.inline && 'Flex--inline',
-    Byond.IS_LTE_IE10 && 'Flex--iefix',
-    Byond.IS_LTE_IE10 && props.direction === 'column' && 'Flex--iefix--column',
-    computeBoxClassName(props),
   ]);
 };
 
@@ -35,7 +37,7 @@ export const computeFlexProps = (props: FlexProps) => {
     inline,
     ...rest
   } = props;
-  return computeBoxProps({
+  return {
     style: {
       ...rest.style,
       'flex-direction': direction,
@@ -44,7 +46,7 @@ export const computeFlexProps = (props: FlexProps) => {
       'justify-content': justify,
     },
     ...rest,
-  });
+  };
 };
 
 export const Flex = props => {
@@ -54,8 +56,9 @@ export const Flex = props => {
       className={classes([
         className,
         computeFlexClassName(rest),
+        computeBoxClassName(rest),
       ])}
-      {...computeFlexProps(rest)}
+      {...computeBoxProps(computeFlexProps(rest))}
     />
   );
 };
@@ -74,7 +77,7 @@ export const computeFlexItemClassName = (props: FlexItemProps) => {
   return classes([
     'Flex__item',
     Byond.IS_LTE_IE10 && 'Flex__item--iefix',
-    computeBoxClassName(props),
+    Byond.IS_LTE_IE10 && (props.grow && props.grow > 0) && 'Flex__item--iefix--grow',
   ]);
 };
 
@@ -85,28 +88,23 @@ export const computeFlexItemProps = (props: FlexItemProps) => {
     grow,
     order,
     shrink,
-    basis,
+    // IE11: Always set basis to specified width, which fixes certain
+    // bugs when rendering tables inside the flex.
+    basis = props.width,
     align,
     ...rest
   } = props;
-  const computedBasis = basis
-    // IE11: Set basis to specified width if it's known, which fixes certain
-    // bugs when rendering tables inside the flex.
-    ?? props.width
-    // If grow is used, basis should be set to 0 to be consistent with
-    // flex css shorthand `flex: 1`.
-    ?? (grow !== undefined ? 0 : undefined);
-  return computeBoxProps({
+  return {
     style: {
       ...style,
       'flex-grow': grow !== undefined && Number(grow),
       'flex-shrink': shrink !== undefined && Number(shrink),
-      'flex-basis': unit(computedBasis),
+      'flex-basis': unit(basis),
       'order': order,
       'align-self': align,
     },
     ...rest,
-  });
+  };
 };
 
 const FlexItem = props => {
@@ -116,8 +114,9 @@ const FlexItem = props => {
       className={classes([
         className,
         computeFlexItemClassName(props),
+        computeBoxClassName(props),
       ])}
-      {...computeFlexItemProps(rest)}
+      {...computeBoxProps(computeFlexItemProps(rest))}
     />
   );
 };

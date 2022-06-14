@@ -37,7 +37,7 @@ export const ProgressBar = props => {
   const fillStyles = {
     'width': clamp01(scaledValue) * 100 + '%',
   };
-  if (CSS_COLORS.includes(effectiveColor) || effectiveColor === 'default') {
+  if (CSS_COLORS.includes(effectiveColor)) {
     // If the color is a color-<name> class, just use that.
     outerClasses.push('ProgressBar--color--' + effectiveColor);
   } else {

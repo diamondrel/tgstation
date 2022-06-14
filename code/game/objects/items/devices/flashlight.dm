@@ -19,10 +19,9 @@
 	light_on = FALSE
 	var/on = FALSE
 
-
 /obj/item/flashlight/Initialize(mapload)
 	. = ..()
-	// AddComponent(datum/component/interro_initiator)
+	AddComponent(/datum/component/interro_initiator)
 	if(icon_state == "[initial(icon_state)]-on")
 		on = TRUE
 	update_brightness()
@@ -145,34 +144,27 @@
 						to_chat(user, span_notice("[M] doesn't have any organs in [their] mouth."))
 					if(pill_count)
 						to_chat(user, span_notice("[M] has [pill_count] pill[pill_count > 1 ? "s" : ""] implanted in [their] teeth."))
-	// else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
-	// 	user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
-	// 		span_notice("You push the [src] reaaalll close to [M]'s head."))
-	// 	ui_interact(user, datum/tgui/ui)
-	// else
-	// 	return ..()
 			if(BODY_ZONE_HEAD)
-				if (HAS_TRAIT(M, TRAIT_RESTRAINED))
+				if (HAS_TRAIT(M, TRAIT_IMMOBILIZED))
 					if(!(M in GLOB.alive_player_list))
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who stares blankly past."), span_warning("[M] stares right through you and appears completely unresponsive to anything. They may snap out of it soon."),\
 						span_hear("You hear a [src] clicking on, followed by a sigh."))
-					if(M.stat == UNCONSCIOUS)
+					else if(M.stat == UNCONSCIOUS)
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who softly grunts in response."), span_warning("[M] merely grunts in response, they appear to be unconscious."),\
 						span_hear("You hear muffled grunts and a [src] clicking on, followed by a sigh."))
 					else if(M.stat == DEAD)
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s head, who doesn't respond."), span_warning("Dead men tell no tales."),\
 						span_hear("You hear a [src] clicking on, followed by a sigh."))
-					if(HAS_TRAIT(M,TRAIT_BROKEN))
+					else if(HAS_TRAIT(M,TRAIT_BROKEN))
 						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who kicks and screams."), span_warning("[M] screams, you've broken them already."),\
 						span_hear("You hear screaming and a [src] clicking on, followed by a sigh."))
-	//else if (HAS_TRAIT(M, TRAIT_RESTRAINED)&&BODY_ZONE_HEAD)
-	//	user.visible_message(span_notice("[user] pushes the [src] close to [M]'s head."),\
-	//		span_notice("You push the [src] reaaalll close to [M]'s head."))
-	//	ui_interact(user, datum/tgui/ui)
+					else
+						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who starts sweating."), span_notice("[M] leans away from you and begins sweating."),\
+						span_hear("You hear a [src] clicking on."))
 	else
 		return ..()
 
-/obj/item/flashlight/ui_interact(mob/user, datum/tgui/ui)
+/*/obj/item/flashlight/ui_interact(mob/user, datum/tgui/ui)
   ui = SStgui.try_update_ui(user, src, ui)
   if(!ui)
     ui = new(user, src, "InterroSelector")
@@ -205,7 +197,7 @@
   if(action == "verify")
     //var/current_target=params["target"]
     .=TRUE
-  //interrogation_selector(mob/user, mob/living/target, obj/item/tool)
+  interrogation_selector(mob/user, mob/living/target, obj/item/tool)*/
 
 /obj/item/flashlight/pen
 	name = "penlight"

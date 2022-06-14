@@ -10,11 +10,10 @@ import { Component } from 'inferno';
 import { Window } from '../../layouts';
 import { resolveAsset } from '../../assets';
 import { CircuitInfo } from './CircuitInfo';
-import { ABSOLUTE_Y_OFFSET, MOUSE_BUTTON_LEFT, TIME_UNTIL_PORT_RELEASE_WORKS } from './constants';
+import { ABSOLUTE_Y_OFFSET, MOUSE_BUTTON_LEFT } from './constants';
 import { Connections } from './Connections';
 import { ObjectComponent } from './ObjectComponent';
 import { VariableMenu } from './VariableMenu';
-import { ComponentMenu } from './ComponentMenu';
 
 export class IntegratedCircuit extends Component {
   constructor() {
@@ -27,8 +26,7 @@ export class IntegratedCircuit extends Component {
       zoom: 1,
       backgroundX: 0,
       backgroundY: 0,
-      variableMenuOpen: false,
-      componentMenuOpen: false,
+      menuOpen: false,
     };
     this.handlePortLocation = this.handlePortLocation.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -41,13 +39,6 @@ export class IntegratedCircuit extends Component {
     this.handlePortRelease = this.handlePortRelease.bind(this);
     this.handleZoomChange = this.handleZoomChange.bind(this);
     this.handleBackgroundMoved = this.handleBackgroundMoved.bind(this);
-
-    this.onVarClickedSetter = this.onVarClickedSetter.bind(this);
-    this.onVarClickedGetter = this.onVarClickedGetter.bind(this);
-    this.handleVarDropped = this.handleVarDropped.bind(this);
-
-    this.handleMouseDownComponent = this.handleMouseDownComponent.bind(this);
-    this.handleComponentDropped = this.handleComponentDropped.bind(this);
   }
 
   // Helper function to get an element's exact position
@@ -91,11 +82,6 @@ export class IntegratedCircuit extends Component {
   }
 
   handlePortClick(portIndex, componentId, port, isOutput, event) {
-    if (this.state.selectedPort) {
-      this.handlePortUp(portIndex, componentId, port, isOutput, event);
-      return;
-    }
-
     if (event.button !== MOUSE_BUTTON_LEFT) {
       return;
     }
@@ -112,9 +98,6 @@ export class IntegratedCircuit extends Component {
 
     this.handlePortDrag(event);
 
-    this.timeUntilPortReleaseTimesOut
-      = Date.now() + TIME_UNTIL_PORT_RELEASE_WORKS;
-
     window.addEventListener('mousemove', this.handlePortDrag);
     window.addEventListener('mouseup', this.handlePortRelease);
   }
@@ -122,7 +105,7 @@ export class IntegratedCircuit extends Component {
   // mouse up called whilst over a port. This means we can check if selectedPort
   // exists and do perform some actions if it does.
   handlePortUp(portIndex, componentId, port, isOutput, event) {
-    const { act, data: uiData } = useBackend(this.context);
+    const { act } = useBackend(this.context);
     const {
       selectedPort,
     } = this.state;
@@ -132,9 +115,6 @@ export class IntegratedCircuit extends Component {
     if (selectedPort.is_output === isOutput) {
       return;
     }
-    this.setState({
-      selectedPort: null,
-    });
     let data;
     if (isOutput) {
       data = {
@@ -152,26 +132,6 @@ export class IntegratedCircuit extends Component {
       };
     }
     act("add_connection", data);
-
-    const { components } = uiData;
-    const {
-      input_component_id,
-      input_port_id,
-      output_component_id,
-      output_port_id,
-    } = data;
-
-    const input_comp = components[input_component_id-1];
-    const input_port = input_comp.input_ports[input_port_id-1];
-    const output_comp = components[output_component_id-1];
-    const output_port = output_comp.output_ports[output_port_id-1];
-    // Do not predict ports that do not match because there is no guarantee
-    // that they will properly match.
-    // TODO: Implement proper prediction for this
-    if (!input_port || input_port.type !== output_port.type) {
-      return;
-    }
-    input_port.connected_to.push(isOutput? port.ref : selectedPort.ref);
   }
 
   handlePortDrag(event) {
@@ -184,20 +144,12 @@ export class IntegratedCircuit extends Component {
   }
 
   handlePortRelease(event) {
-    window.removeEventListener('mouseup', this.handlePortRelease);
-
-    // This will let players release their mouse when dragging
-    // to stop connecting the port, whilst letting players
-    // click on the port to click and connect.
-    if (this.timeUntilPortReleaseTimesOut > Date.now()) {
-      return;
-    }
-
     this.setState({
       selectedPort: null,
     });
 
     window.removeEventListener('mousemove', this.handlePortDrag);
+    window.removeEventListener('mouseup', this.handlePortRelease);
   }
 
   handlePortRightClick(portIndex, componentId, port, isOutput, event) {
@@ -222,6 +174,11 @@ export class IntegratedCircuit extends Component {
       backgroundX: newX,
       backgroundY: newY,
     });
+    if (this.state.menuOpen) {
+      this.setState({
+        menuOpen: false,
+      });
+    }
   }
 
   componentDidMount() {
@@ -240,10 +197,6 @@ export class IntegratedCircuit extends Component {
     if (examined_name) {
       act('remove_examined_component');
     }
-
-    if (this.state.selectedPort) {
-      this.handlePortRelease(event);
-    }
   }
 
   handleMouseUp(event) {
@@ -255,97 +208,6 @@ export class IntegratedCircuit extends Component {
         screen_y: backgroundY,
       });
     }
-  }
-
-  onVarClickedSetter(event, variable) {
-    this.handleVarClicked(event, variable, true);
-  }
-
-  onVarClickedGetter(event, variable) {
-    this.handleVarClicked(event, variable, false);
-  }
-
-  handleVarClicked(event, variable, is_setter) {
-    this.setState({
-      draggingVariable: variable,
-      variableIsSetter: is_setter,
-    });
-
-    window.addEventListener('mouseup', this.handleVarDropped);
-  }
-
-  handleVarDropped(event) {
-    const { data, act } = useBackend(this.context);
-    const {
-      draggingVariable,
-      variableIsSetter,
-      backgroundX,
-      backgroundY,
-      zoom,
-    } = this.state;
-    const {
-      screen_x,
-      screen_y,
-    } = data;
-
-    const xPos = (event.clientX - (backgroundX || screen_x));
-    const yPos = (event.clientY - (backgroundY || screen_y));
-
-    act("add_setter_or_getter", {
-      variable: draggingVariable,
-      is_setter: variableIsSetter,
-      rel_x: xPos*Math.pow(zoom, -1),
-      rel_y: (yPos + ABSOLUTE_Y_OFFSET)*Math.pow(zoom, -1),
-    });
-
-    this.setState({
-      draggingVariable: null,
-      variableIsSetter: null,
-    });
-
-    window.removeEventListener('mouseup', this.handleVarDropped);
-  }
-
-
-  handleMouseDownComponent(event, component) {
-    this.setState({
-      draggingComponent: component.type,
-    });
-
-    window.addEventListener('mouseup', this.handleComponentDropped);
-  }
-
-  handleComponentDropped(event) {
-    const { data, act } = useBackend(this.context);
-    const {
-      draggingComponent,
-      backgroundX,
-      backgroundY,
-      zoom,
-    } = this.state;
-    const {
-      screen_x,
-      screen_y,
-    } = data;
-
-    this.setState({
-      draggingComponent: null,
-    });
-
-    window.removeEventListener('mouseup', this.handleComponentDropped);
-
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    const xPos = (event.clientX - (backgroundX || screen_x));
-    const yPos = (event.clientY - (backgroundY || screen_y));
-
-    act("print_component", {
-      component_to_print: draggingComponent,
-      rel_x: xPos*Math.pow(zoom, -1),
-      rel_y: (yPos + ABSOLUTE_Y_OFFSET)*Math.pow(zoom, -1),
-    });
   }
 
   render() {
@@ -363,14 +225,8 @@ export class IntegratedCircuit extends Component {
       is_admin,
       variables,
       global_basic_types,
-      stored_designs,
     } = data;
-    const {
-      locations,
-      selectedPort,
-      variableMenuOpen,
-      componentMenuOpen,
-    } = this.state;
+    const { locations, selectedPort, menuOpen } = this.state;
     const connections = [];
 
     for (const comp of components) {
@@ -407,8 +263,8 @@ export class IntegratedCircuit extends Component {
 
     return (
       <Window
-        width={1200}
-        height={800}
+        width={600}
+        height={600}
         buttons={(
           <Box
             width="160px"
@@ -420,7 +276,7 @@ export class IntegratedCircuit extends Component {
               <Stack.Item grow>
                 <Input
                   fluid
-                  placeholder="Name"
+                  placeholder="Circuit Name"
                   value={display_name}
                   onChange={(e, value) => act("set_display_name", { display_name: value })}
                 />
@@ -431,21 +287,9 @@ export class IntegratedCircuit extends Component {
                   top={0}
                   color="transparent"
                   icon="cog"
-                  selected={variableMenuOpen}
+                  selected={menuOpen}
                   onClick={() => this.setState((state) => ({
-                    variableMenuOpen: !state.variableMenuOpen,
-                  }))}
-                />
-              </Stack.Item>
-              <Stack.Item basis="24px">
-                <Button
-                  position="absolute"
-                  top={0}
-                  color="transparent"
-                  icon="plus"
-                  selected={componentMenuOpen}
-                  onClick={() => this.setState((state) => ({
-                    componentMenuOpen: !state.componentMenuOpen,
+                    menuOpen: !state.menuOpen,
                   }))}
                 />
               </Stack.Item>
@@ -490,7 +334,6 @@ export class IntegratedCircuit extends Component {
                     onPortMouseDown={this.handlePortClick}
                     onPortRightClick={this.handlePortRightClick}
                     onPortMouseUp={this.handlePortUp}
-                    act={act}
                   />
                 )
             )}
@@ -507,60 +350,32 @@ export class IntegratedCircuit extends Component {
               notices={examined_notices}
             />
           )}
-          {!!variableMenuOpen && (
+          {!!menuOpen && (
             <Box
               position="absolute"
-              left={0}
               bottom={0}
-              height="20%"
-              minHeight="175px"
-              minWidth="600px"
-              width="50%"
-              style={{
-                "border-radius": "0px 32px 0px 0px",
-                "background-color": "rgba(0, 0, 0, 0.3)",
-                "-ms-user-select": "none",
-              }}
-              unselectable="on"
+              left={0}
+              height="50%"
+              minHeight="300px"
+              width="100%"
+              backgroundColor="#202020"
             >
               <VariableMenu
                 variables={variables}
                 types={global_basic_types}
-                onClose={(event) => this.setState({ variableMenuOpen: false })}
-                onAddVariable={(name, type, asList, event) => act("add_variable", {
+                onAddVariable={(name, type, event) => act("add_variable", {
                   variable_name: name,
                   variable_datatype: type,
-                  is_list: asList,
                 })}
                 onRemoveVariable={(name, event) => act("remove_variable", {
                   variable_name: name,
                 })}
-                handleMouseDownSetter={this.onVarClickedSetter}
-                handleMouseDownGetter={this.onVarClickedGetter}
-                style={{
-                  "border-radius": "0px 32px 0px 0px",
-                }}
-              />
-            </Box>
-          )}
-          {!!componentMenuOpen && (
-            <Box
-              position="absolute"
-              right={0}
-              top={0}
-              height="100%"
-              width="300px"
-              style={{
-                "background-color": "rgba(0, 0, 0, 0.3)",
-                "-ms-user-select": "none",
-              }}
-              unselectable="on"
-            >
-              <ComponentMenu
-                components={stored_designs && Object.keys(stored_designs) || []}
-                onClose={(event) => this.setState({ componentMenuOpen: false })}
-                onMouseDownComponent={this.handleMouseDownComponent}
-                showAll={is_admin}
+                handleAddSetter={(e) => act("add_setter_or_getter", {
+                  is_setter: true,
+                })}
+                handleAddGetter={(e) => act("add_setter_or_getter", {
+                  is_setter: false,
+                })}
               />
             </Box>
           )}

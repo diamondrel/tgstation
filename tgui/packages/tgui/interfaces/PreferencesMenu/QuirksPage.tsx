@@ -73,7 +73,7 @@ const QuirkList = (props: {
                     <Stack fill style={{
                       "font-size": "1.2em",
                     }}>
-                      <Stack.Item grow basis="content">
+                      <Stack.Item grow>
                         <b>{quirk.name}</b>
                       </Stack.Item>
 
@@ -83,7 +83,7 @@ const QuirkList = (props: {
                     </Stack>
                   </Stack.Item>
 
-                  <Stack.Item grow basis="content" style={{
+                  <Stack.Item grow style={{
                     "margin-top": 0,
                     "padding": "3px",
                   }}>

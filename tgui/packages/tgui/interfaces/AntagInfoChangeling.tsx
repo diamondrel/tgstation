@@ -88,7 +88,7 @@ const IntroductionSection = (props, context) => {
             &ensp;{hive_name}
           </span>.
         </Stack.Item>
-        <Stack.Item>
+        <Stack.Item grow>
           <ObjectivePrintout />
         </Stack.Item>
       </Stack>
@@ -106,15 +106,15 @@ const AbilitiesSection = (props, context) => {
             <Stack.Item basis={0} textColor="label" grow>
               Your
               <span style={absorbstyle}>
-                &ensp;Absorb DNA
+                &ensp;Absorb
               </span> ability
-              allows you to steal the DNA and memories of a victim.
-              Your
+              allows you to steal the DNA and memories of a victim. The
               <span style={absorbstyle}>
-                &ensp;Extract DNA Sting
+                &ensp;Transform Sting
               </span> ability
-              also steals the DNA of a victim, and is undetectable, but
-              does not grant you their memories or speech patterns.
+              does the same instantly and quietly, but doesn&apos;t
+              count for objectives, kill them, or
+              include their memories and speech patterns.
             </Stack.Item>
             <Stack.Divider />
             <Stack.Item basis={0} textColor="label" grow>
@@ -170,11 +170,6 @@ const MemoriesSection = (props, context) => {
     selectedMemory,
     setSelectedMemory,
   ] = useSharedState(context, "memory", !!memories && memories[0] || null);
-  const memoryMap = {};
-  for (const index in memories) {
-    const memory = memories[index];
-    memoryMap[memory.name] = memory;
-  }
   return (
     <Section
       fill
@@ -202,17 +197,16 @@ const MemoriesSection = (props, context) => {
         <Stack vertical>
           <Stack.Item>
             <Dropdown
-              width="100%"
-              selected={selectedMemory?.name}
+              selected={selectedMemory}
               options={
-                memories.map(memory => {
-                  return memory.name;
+                Object.keys(memories).map(memory => {
+                  return memories[memory];
                 })
               }
-              onSelected={selected => setSelectedMemory(memoryMap[selected])} />
+              onSelected={selected => setSelectedMemory(selected)} />
           </Stack.Item>
           <Stack.Item>
-            {!!selectedMemory && selectedMemory.story}
+            {!!selectedMemory && selectedMemory}
           </Stack.Item>
         </Stack>
       )}
@@ -248,7 +242,7 @@ export const AntagInfoChangeling = (props, context) => {
           "backgroundImage": "none",
         }}>
         <Stack vertical fill>
-          <Stack.Item maxHeight={13.2}>
+          <Stack.Item maxHeight={13.2} grow>
             <IntroductionSection />
           </Stack.Item>
           <Stack.Item grow={4}>

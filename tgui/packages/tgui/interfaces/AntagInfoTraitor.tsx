@@ -26,7 +26,6 @@ type Objective = {
 }
 
 type Info = {
-  has_codewords: BooleanLike;
   phrases: string;
   responses: string;
   theme: string;
@@ -176,55 +175,42 @@ const UplinkSection = (props, context) => {
 const CodewordsSection = (props, context) => {
   const { data } = useBackend<Info>(context);
   const {
-    has_codewords,
     phrases,
     responses,
   } = data;
   return (
-    <Section
-      title="Codewords"
-      mb={!has_codewords && -1}>
+    <Section title="Codewords">
       <Stack fill>
-        {!has_codewords && (
+        <Stack.Item grow basis={0}>
           <BlockQuote>
-            You have not been supplied the Syndicate codewords.
-            You will have to use alternative methods to find potential allies.
-            Proceed with caution, however, as everyone is a potential foe.
+            The Syndicate have provided you with the following
+            codewords to identify fellow agents. Use the codewords
+            during regular conversation to identify other agents.
+            Proceed with caution, however, as everyone is a
+            potential foe.
+            <span style={badstyle}>
+              &ensp;You have memorized the codewords, allowing you
+              to recognise them when heard.
+            </span>
           </BlockQuote>
-        ) || (
-          <>
-            <Stack.Item grow basis={0}>
-              <BlockQuote>
-                The Syndicate have provided you with the following
-                codewords to identify fellow agents. Use the codewords
-                during regular conversation to identify other agents.
-                Proceed with caution, however, as everyone is a
-                potential foe.
-                <span style={badstyle}>
-                  &ensp;You have memorized the codewords, allowing you
-                  to recognise them when heard.
-                </span>
-              </BlockQuote>
+        </Stack.Item>
+        <Stack.Divider mr={1} />
+        <Stack.Item grow basis={0}>
+          <Stack vertical>
+            <Stack.Item>
+              Code Phrases:
             </Stack.Item>
-            <Stack.Divider mr={1} />
-            <Stack.Item grow basis={0}>
-              <Stack vertical>
-                <Stack.Item>
-                  Code Phrases:
-                </Stack.Item>
-                <Stack.Item bold textColor="blue">
-                  {phrases}
-                </Stack.Item>
-                <Stack.Item>
-                  Code Responses:
-                </Stack.Item>
-                <Stack.Item bold textColor="red">
-                  {responses}
-                </Stack.Item>
-              </Stack>
+            <Stack.Item bold textColor="blue">
+              {phrases}
             </Stack.Item>
-          </>
-        )}
+            <Stack.Item>
+              Code Responses:
+            </Stack.Item>
+            <Stack.Item bold textColor="red">
+              {responses}
+            </Stack.Item>
+          </Stack>
+        </Stack.Item>
       </Stack>
     </Section>
   );

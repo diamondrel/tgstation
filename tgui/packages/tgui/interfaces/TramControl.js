@@ -3,7 +3,6 @@ import { Box, Button, Dimmer, Icon, Section, Stack } from '../components';
 import { Window } from '../layouts';
 
 const DEPARTMENT2COLOR = {
-  // Station
   Arrivals: "black",
   Service: "olive",
   Command: "blue",
@@ -11,17 +10,7 @@ const DEPARTMENT2COLOR = {
   Medical: "teal",
   Engineering: "yellow",
   Cargo: "brown",
-  Science: "purple",
   Departures: "white",
-  // Hilbert Research Facility
-  Reception: "white",
-  Botany: "olive",
-  Chemistry: "teal",
-  Processing: "brown",
-  Xenobiology: "purple",
-  Ordnance: "yellow",
-  Office: "red",
-  Dormitories: "black",
 };
 
 const COLOR2BLURB = {
@@ -97,7 +86,7 @@ export const TramControl = (props, context) => {
       if (!tram_location) return "bad";
       const here = dest.name === tram_location;
       const selected = transitIndex === destinations.indexOf(dest);
-      return here ? "blue" : selected ? "green" : "transparent";
+      return !tram_location ? "bad" : here ? "blue" : selected ? "green" : "transparent";
     };
     return (
       <Stack vertical>
@@ -163,7 +152,7 @@ export const TramControl = (props, context) => {
               </Stack.Item>
               <Stack.Item mb={4}>
                 <Stack fill>
-                  <Stack.Item grow />
+                  <Stack.Item grow={2} />
                   {destinations.map(dest => (
                     <Stack.Item key={dest.name} grow={1} >
                       <Destination dest={dest} />

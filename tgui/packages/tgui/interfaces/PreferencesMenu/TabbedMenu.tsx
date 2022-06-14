@@ -26,7 +26,7 @@ export class TabbedMenu extends Component<TabbedMenuProps> {
           <Stack fill px={5}>
             {this.props.categoryEntries.map(([category]) => {
               return (
-                <Stack.Item key={category} grow basis="content">
+                <Stack.Item key={category} grow>
                   <Button
                     align="center"
                     fontSize="1.2em"

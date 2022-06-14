@@ -33,7 +33,7 @@
 // Initiates interrogation
 /datum/component/interro_initiator/proc/initiate_interro_moment(datum/source, atom/target, mob/user)
 	SIGNAL_HANDLER
-	if(!isliving(target)||!(target in GLOB.alive_player_list)||HAS_TRAIT(target,TRAIT_BROKEN))
+	if(target.stat == UNCONSCIOUS||target.stat == dead||isnull(target.mind)||HAS_TRAIT(target,TRAIT_BROKEN))
 		return
 	INVOKE_ASYNC(src, .proc/do_initiate_interro_moment, target, user)
 	return COMPONENT_CANCEL_ATTACK_CHAIN
@@ -49,7 +49,7 @@
 	var/list/available_interro = get_available_interro(user, target)
 
 	if(!length(available_interro))
-		if (!HAS_TRAIT(target, TRAIT_RESTRAINED))
+		if (!HAS_TRAIT(target, TRAIT_IMMOBILIZED))
 			target.balloon_alert(user, "no interrogations available!")
 		else
 			target.balloon_alert(user, "restrain them!")
@@ -65,19 +65,22 @@
 
 	ui_interact(user)
 
-/datum/component/interro_initiator/proc/get_available_interro(mob/user, mob/living/target)
+/datum/component/interro_initiator/proc/get_available_interro(mob/user, mob/living/target, var/interro_stage)
 	var/list/available_interro = list()
 
 	for(var/datum/detectivework/interrogation/interro as anything in GLOB.interro_list)
-		if(!HAS_TRAIT(target, TRAIT_RESTRAINED))
+		if(!HAS_TRAIT(target, TRAIT_IMMOBILIZED))
 			continue
 		if(!interro.can_start(user, target))
 			continue
+		if(interro_stage!=interro.stage){
+			continue
+		}
 		for(var/path in interro.target_mobtypes)
 			if(istype(target, path))
 				available_interro += interro
 				break
-		return available_interro
+	return available_interro
 
 // De-initialzes the interrogation
 /*/datum/component/interro_initiator/proc/attempt_cancel_interro(datum/detectivework/interrogation/the_interro, mob/living/target, mob/user)
@@ -123,11 +126,11 @@
 
 	if (isnull(interro_target))
 		return TRUE
-		if (action=="start_interro")
-			for (var/datum/detectivework/interrogation/interro as anything in get_available_interro(user, interro_target))
-				if (interro.name == params["interro_name"])
-					try_choose_interro(user, interro_target, interro)
-					return TRUE
+	if (action=="start_interro")
+		for (var/datum/detectivework/interrogation/interro as anything in get_available_interro(user, interro_target))
+			if (interro.name == params["interro_name"])
+				try_choose_interro(user, interro_target, interro)
+				return TRUE
 
 /datum/component/interro_initiator/ui_assets(mob/user)
 	return list(
@@ -137,18 +140,17 @@
 /datum/component/interro_initiator/ui_data(mob/user)
 	var/mob/living/interro_target = interro_target_ref.resolve()
 
-	var/list/interro = list()
-	if (!isnull(interro_target))
-		for (var/datum/detectivework/interrogation/all_interros as anything in get_available_interro(user, interro_target))
+	var/list/interros = list()
+	if(!isnull(interro_target))
+		for (var/datum/detectivework/interrogation/interro as anything in get_available_interro(user, interro_target))
 			var/list/interro_info = list(
-				"name" = all_interros.name,
+				"name" = interro.name,
 			)
-
-			interro += list(interro_info)
+			interros += list(interro_info)
 
 	return list(
 		"target_name" = interro_target?.name,
-		"interro" = interro,
+		"interros"=interros,
 	)
 
 /datum/component/interro_initiator/ui_close(mob/user)
@@ -190,8 +192,8 @@
 		target.balloon_alert(user, "can't start the interrogation!")
 		return
 
-	if (!HAS_TRAIT(target, TRAIT_RESTRAINED))
-		target.balloon_alert(user, "patient is not restrained!")
+	if (!HAS_TRAIT(target, TRAIT_IMMOBILIZED))
+		target.balloon_alert(user, "patient is not buckled!")
 		return
 
 	if (!interro.can_start(user, target))
