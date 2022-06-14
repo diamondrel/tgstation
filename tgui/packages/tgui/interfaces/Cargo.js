@@ -72,6 +72,7 @@ export const CargoContent = (props, context) => {
 const CargoStatus = (props, context) => {
   const { act, data } = useBackend(context);
   const {
+    department,
     grocery,
     away,
     docked,
@@ -85,7 +86,7 @@ const CargoStatus = (props, context) => {
   } = data;
   return (
     <Section
-      title="Cargo"
+      title={department}
       buttons={(
         <Box inline bold>
           <AnimatedNumber

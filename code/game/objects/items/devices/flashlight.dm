@@ -19,9 +19,9 @@
 	light_on = FALSE
 	var/on = FALSE
 
+
 /obj/item/flashlight/Initialize(mapload)
 	. = ..()
-	AddComponent(/datum/component/interro_initiator)
 	if(icon_state == "[initial(icon_state)]-on")
 		on = TRUE
 	update_brightness()
@@ -52,27 +52,34 @@
 
 /obj/item/flashlight/attack(mob/living/carbon/M, mob/living/carbon/human/user)
 	add_fingerprint(user)
-	if(istype(M) && on && (user.zone_selected in list(BODY_ZONE_PRECISE_EYES, BODY_ZONE_PRECISE_MOUTH, BODY_ZONE_HEAD)))
+	if(istype(M) && on && (user.zone_selected in list(BODY_ZONE_PRECISE_EYES, BODY_ZONE_PRECISE_MOUTH)))
+
 		if((HAS_TRAIT(user, TRAIT_CLUMSY) || HAS_TRAIT(user, TRAIT_DUMB)) && prob(50)) //too dumb to use flashlight properly
 			return ..() //just hit them in the head
+
 		if(!ISADVANCEDTOOLUSER(user))
 			to_chat(user, span_warning("You don't have the dexterity to do this!"))
 			return
+
 		if(!M.get_bodypart(BODY_ZONE_HEAD))
 			to_chat(user, span_warning("[M] doesn't have a head!"))
 			return
+
 		if(light_power < 1)
 			to_chat(user, "[span_warning("\The [src] isn't bright enough to see anything!")] ")
 			return
+
 		switch(user.zone_selected)
 			if(BODY_ZONE_PRECISE_EYES)
 				if((M.head && M.head.flags_cover & HEADCOVERSEYES) || (M.wear_mask && M.wear_mask.flags_cover & MASKCOVERSEYES) || (M.glasses && M.glasses.flags_cover & GLASSESCOVERSEYES))
 					to_chat(user, span_warning("You're going to need to remove that [(M.head && M.head.flags_cover & HEADCOVERSEYES) ? "helmet" : (M.wear_mask && M.wear_mask.flags_cover & MASKCOVERSEYES) ? "mask": "glasses"] first!"))
 					return
-				var/obj/item/organ/eyes/E = M.getorganslot(ORGAN_SLOT_EYES)
+
+				var/obj/item/organ/internal/eyes/E = M.getorganslot(ORGAN_SLOT_EYES)
 				if(!E)
 					to_chat(user, span_warning("[M] doesn't have any eyes!"))
 					return
+
 				if(M == user) //they're using it on themselves
 					if(M.flash_act(visual = 1))
 						M.visible_message(span_notice("[M] directs [src] to [M.p_their()] eyes."), span_notice("You wave the light in front of your eyes! Trippy!"))
@@ -87,11 +94,15 @@
 						to_chat(user, span_danger("[M]'s pupils give an eerie glow!"))
 					else //they're okay!
 						to_chat(user, span_notice("[M]'s pupils narrow."))
+
 			if(BODY_ZONE_PRECISE_MOUTH)
+
 				if(M.is_mouth_covered())
 					to_chat(user, span_warning("You're going to need to remove that [(M.head && M.head.flags_cover & HEADCOVERSMOUTH) ? "helmet" : "mask"] first!"))
 					return
+
 				var/their = M.p_their()
+
 				var/list/mouth_organs = new
 				for(var/obj/item/organ/O in M.internal_organs)
 					if(O.zone == BODY_ZONE_PRECISE_MOUTH)
@@ -107,9 +118,11 @@
 								organ_list += ", "
 						var/obj/item/organ/O = mouth_organs[I]
 						organ_list += (O.gender == "plural" ? O.name : "\an [O.name]")
+
 				var/pill_count = 0
 				for(var/datum/action/item_action/hands_free/activate_pill/AP in M.actions)
 					pill_count++
+
 				if(M == user)
 					var/can_use_mirror = FALSE
 					if(isturf(user.loc))
@@ -124,6 +137,7 @@
 									can_use_mirror = mirror.pixel_x > 0
 								if(WEST)
 									can_use_mirror = mirror.pixel_x < 0
+
 					M.visible_message(span_notice("[M] directs [src] to [their] mouth."), \
 					span_notice("You point [src] into your mouth."))
 					if(!can_use_mirror)
@@ -135,6 +149,7 @@
 						to_chat(user, span_notice("There's nothing inside your mouth."))
 					if(pill_count)
 						to_chat(user, span_notice("You have [pill_count] implanted pill[pill_count > 1 ? "s" : ""]."))
+
 				else
 					user.visible_message(span_notice("[user] directs [src] to [M]'s mouth."),\
 						span_notice("You direct [src] to [M]'s mouth."))
@@ -144,60 +159,9 @@
 						to_chat(user, span_notice("[M] doesn't have any organs in [their] mouth."))
 					if(pill_count)
 						to_chat(user, span_notice("[M] has [pill_count] pill[pill_count > 1 ? "s" : ""] implanted in [their] teeth."))
-			if(BODY_ZONE_HEAD)
-				if (HAS_TRAIT(M, TRAIT_IMMOBILIZED))
-					if(!(M in GLOB.alive_player_list))
-						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who stares blankly past."), span_warning("[M] stares right through you and appears completely unresponsive to anything. They may snap out of it soon."),\
-						span_hear("You hear a [src] clicking on, followed by a sigh."))
-					else if(M.stat == UNCONSCIOUS)
-						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who softly grunts in response."), span_warning("[M] merely grunts in response, they appear to be unconscious."),\
-						span_hear("You hear muffled grunts and a [src] clicking on, followed by a sigh."))
-					else if(M.stat == DEAD)
-						user.visible_message(span_notice("[user] holds the [src] close to [M]'s head, who doesn't respond."), span_warning("Dead men tell no tales."),\
-						span_hear("You hear a [src] clicking on, followed by a sigh."))
-					else if(HAS_TRAIT(M,TRAIT_BROKEN))
-						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who kicks and screams."), span_warning("[M] screams, you've broken them already."),\
-						span_hear("You hear screaming and a [src] clicking on, followed by a sigh."))
-					else
-						user.visible_message(span_notice("[user] holds the [src] close to [M]'s face, who starts sweating."), span_notice("[M] leans away from you and begins sweating."),\
-						span_hear("You hear a [src] clicking on."))
+
 	else
 		return ..()
-
-/*/obj/item/flashlight/ui_interact(mob/user, datum/tgui/ui)
-  ui = SStgui.try_update_ui(user, src, ui)
-  if(!ui)
-    ui = new(user, src, "InterroSelector")
-    ui.open()
-
-/obj/item/flashlight/ui_data(mob/user)
-  //var/list/data = list()
-  //data["name"] = name
-  //data["target"] = target
-  //data["type"] = type
-  //data["difficulty"] = difficulty
-  var/list/data = list()
-  /*data["name"] = name
-  data["target"] = target
-  data["type"] = type*/
-
-  //return data
-
-/obj/item/flashlight/ui_act(action, params)
-  //. = ..()
-  //if(.)
-  //  return
-  //if(action == "verify")
-  //  var/current_target=params["target"]
-  //  .=TRUE
-  //interrogation_selector(mob/user, mob/living/target, obj/item/tool, )
-  . = ..()
-  if(.)
-    return
-  if(action == "verify")
-    //var/current_target=params["target"]
-    .=TRUE
-  interrogation_selector(mob/user, mob/living/target, obj/item/tool)*/
 
 /obj/item/flashlight/pen
 	name = "penlight"
@@ -563,7 +527,7 @@
 	if(!fuel)
 		user.visible_message(span_suicide("[user] is trying to squirt [src]'s fluids into [user.p_their()] eyes... but it's empty!"))
 		return SHAME
-	var/obj/item/organ/eyes/eyes = user.getorganslot(ORGAN_SLOT_EYES)
+	var/obj/item/organ/internal/eyes/eyes = user.getorganslot(ORGAN_SLOT_EYES)
 	if(!eyes)
 		user.visible_message(span_suicide("[user] is trying to squirt [src]'s fluids into [user.p_their()] eyes... but [user.p_they()] don't have any!"))
 		return SHAME
